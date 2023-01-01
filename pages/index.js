@@ -327,16 +327,17 @@ export default function Home() {
           <div>
             <h6>Account Name: {account}</h6>
             <h6>Account Balance: {balance}</h6>
-
             <hr />
           </div>
 
           <div>
             {users.length > 0 && (
               <div>
+                <p>{`${JSON.stringify(users)}`}</p>
                 <p>{`Used faucet: ${users.UsedFaucet}`}</p>
                 <p>{`My Gov Tokens: ${users.myGovTokens._hex}`}</p>
                 <p>{`My Gov Tokens Locked Until: ${users.myGovTokensLockedUntil._hex}`}</p>
+                <p>{`${JSON.stringify(users)}`}</p>
               </div>
             )}
             <form className="form">
@@ -359,7 +360,7 @@ export default function Home() {
           <div>
             {submitSurvey && (
               <div>
-                <p>{`surveyid: ${submitSurvey._hex}`}</p>
+                <p>{`${JSON.stringify(submitSurvey)}`}</p>
               </div>
             )}
             <input
@@ -393,7 +394,7 @@ export default function Home() {
           <div>
             {takeSurvey && (
               <div>
-                <p>{`response: ${takeSurvey}`}</p>
+                <p>{`${JSON.stringify(takeSurvey)}`}</p>
               </div>
             )}
             <input
@@ -418,8 +419,7 @@ export default function Home() {
           <div>
             {getSurveyResults && (
               <div>
-                <p>{`numtaken: ${getSurveyResults}`}</p>
-                <p>{`results: ${getSurveyResults}`}</p>
+                <p>{`${JSON.stringify(getSurveyResults)}`}</p>
               </div>
             )}
             <input
@@ -438,10 +438,7 @@ export default function Home() {
           <div>
             {getSurveyInfo && (
               <div>
-                <p>{`ipfshash: ${getSurveyInfo.ipfshash}`}</p>
-                <p>{`surveydeadline: ${getSurveyInfo.surveydeadline}`}</p>
-                <p>{`numchoices: ${getSurveyInfo.numchoices}`}</p>
-                <p>{`atmostchoice: ${getSurveyInfo.atmostchoice}`}</p>
+                <p>{`${JSON.stringify(getSurveyInfo)}`}</p>
               </div>
             )}
             <input
@@ -460,7 +457,7 @@ export default function Home() {
           <div>
             {getSurveyOwner && (
               <div>
-                <p>{`surveyowner: ${getSurveyOwner}`}</p>
+                <p>{`${JSON.stringify(getSurveyOwner)}`}</p>
               </div>
             )}
             <input
@@ -479,8 +476,7 @@ export default function Home() {
           <div>
             {getNoOfSurveys && (
               <div>
-                <p>{`Hex: ${getNoOfSurveys._hex}`}</p>
-                <p>{`Is Big Number: ${getNoOfSurveys._isBigNumber}`}</p>
+                <p>{`${JSON.stringify(getNoOfSurveys)}`}</p>
               </div>
             )}
 
@@ -494,7 +490,7 @@ export default function Home() {
           <div>
             {faucet && (
               <div>
-                <p>{`Response: ${faucet}`}</p>
+                <p>{`${JSON.stringify(faucet)}`}</p>
               </div>
             )}
 
@@ -508,7 +504,7 @@ export default function Home() {
           <div>
             {reserveProjectGrant && (
               <div>
-                <p>{`Response: ${reserveProjectGrant}`}</p>
+                <p>{`${JSON.stringify(reserveProjectGrant)}`}</p>
               </div>
             )}
             <input
@@ -530,7 +526,7 @@ export default function Home() {
           <div>
             {withdrawProjectPayment && (
               <div>
-                <p>{`Response: ${withdrawProjectPayment}`}</p>
+                <p>{`${JSON.stringify(withdrawProjectPayment)}`}</p>
               </div>
             )}
             <input
@@ -552,7 +548,7 @@ export default function Home() {
           <div>
             {votingforinstallment && (
               <div>
-                <p>{`Response: ${votingforinstallment}`}</p>
+                <p>{`${JSON.stringify(votingforinstallment)}`}</p>
               </div>
             )}
             <input
@@ -579,7 +575,7 @@ export default function Home() {
           <div>
             {findSchIndex && (
               <div>
-                <p>{`idx: ${findSchIndex._hex}`}</p>
+                <p>{`${JSON.stringify(findSchIndex)}`}</p>
               </div>
             )}
             <input
@@ -598,7 +594,7 @@ export default function Home() {
           <div>
             {getIsProjectFunded && (
               <div>
-                <p>{`response: ${getIsProjectFunded}`}</p>
+                <p>{`${JSON.stringify(getIsProjectFunded)}`}</p>
               </div>
             )}
             <input
@@ -620,7 +616,7 @@ export default function Home() {
           <div>
             {getProjectNextPayment && (
               <div>
-                <p>{`next_payment: ${getProjectNextPayment}`}</p>
+                <p>{`${JSON.stringify(getProjectNextPayment)}`}</p>
               </div>
             )}
             <input
@@ -642,7 +638,7 @@ export default function Home() {
           <div>
             {getProjectOwner && (
               <div>
-                <p>{`Owner: ${getProjectOwner}`}</p>
+                <p>{`${JSON.stringify(getProjectOwner)}`}</p>
               </div>
             )}
             <input
@@ -661,7 +657,7 @@ export default function Home() {
           <div>
             {getProjectInfo && (
               <div>
-                <p>{`Info: ${getProjectInfo}`}</p>
+                <p>{`${JSON.stringify(getProjectInfo)}`}</p>
               </div>
             )}
             <input
@@ -680,7 +676,7 @@ export default function Home() {
           <div>
             {delegateVoteTo && (
               <div>
-                <p>{`Info: ${delegateVoteTo}`}</p>
+                <p>{`${JSON.stringify(delegateVoteTo)}`}</p>
               </div>
             )}
             <input
@@ -704,7 +700,7 @@ export default function Home() {
           <div>
             {donateEther && (
               <div>
-                <p>{`Info: ${donateEther}`}</p>
+                <p>{`${JSON.stringify(donateEther)}`}</p>
               </div>
             )}
             <br />
@@ -718,7 +714,7 @@ export default function Home() {
           <div>
             {donateMyGovToken && (
               <div>
-                <p>{`Info: ${donateMyGovToken}`}</p>
+                <p>{`${JSON.stringify(donateMyGovToken)}`}</p>
               </div>
             )}
             <input
@@ -737,7 +733,7 @@ export default function Home() {
           <div>
             {voteForProjectProposal && (
               <div>
-                <p>{`Info: ${voteForProjectProposal}`}</p>
+                <p>{`${JSON.stringify(voteForProjectProposal)}`}</p>
               </div>
             )}
             <input
@@ -764,7 +760,7 @@ export default function Home() {
           <div>
             {submitProjectProposal && (
               <div>
-                <p>{`Project_id: ${submitProjectProposal._hex}`}</p>
+                <p>{`${JSON.stringify(submitProjectProposal)}`}</p>
               </div>
             )}
             <input
@@ -801,7 +797,7 @@ export default function Home() {
           <div>
             {getNoOfProjectProposals && (
               <div>
-                <p>{`projectProposals.length: ${getNoOfProjectProposals._hex}`}</p>
+                <p>{`${JSON.stringify(getNoOfProjectProposals)}`}</p>
               </div>
             )}
 
@@ -819,7 +815,7 @@ export default function Home() {
           <div>
             {getNoOfFundedProjects && (
               <div>
-                <p>{`Info: ${getNoOfFundedProjects._hex}`}</p>
+                <p>{`${JSON.stringify(getNoOfFundedProjects)}`}</p>
               </div>
             )}
 
@@ -837,7 +833,7 @@ export default function Home() {
           <div>
             {getEtherReceivedByProject && (
               <div>
-                <p>{`Projectid: ${getEtherReceivedByProject._hex}`}</p>
+                <p>{`${JSON.stringify(getEtherReceivedByProject)}`}</p>
               </div>
             )}
 
@@ -855,7 +851,7 @@ export default function Home() {
           <div>
             {transferToken && (
               <div>
-                <p>{`Bool: ${transferToken}`}</p>
+                <p>{`${JSON.stringify(transferToken)}`}</p>
               </div>
             )}
             <input
@@ -879,7 +875,7 @@ export default function Home() {
           <div>
             {transferTokensFrom && (
               <div>
-                <p>{`Bool: ${transferTokensFrom}`}</p>
+                <p>{`${JSON.stringify(transferTokensFrom)}`}</p>
               </div>
             )}
             <input
@@ -912,7 +908,7 @@ export default function Home() {
           <div>
             {allowanceToken && (
               <div>
-                <p>{`Info: ${allowanceToken}`}</p>
+                <p>{`${JSON.stringify(allowanceToken)}`}</p>
               </div>
             )}
             <input
@@ -936,7 +932,7 @@ export default function Home() {
           <div>
             {approveToken && (
               <div>
-                <p>{`Bool: ${approveToken}`}</p>
+                <p>{`${JSON.stringify(approveToken)}`}</p>
               </div>
             )}
 
@@ -961,7 +957,7 @@ export default function Home() {
           <div>
             {totalTokenSupply && (
               <div>
-                <p>{`INfo: ${totalTokenSupply}`}</p>
+                <p>{`${JSON.stringify(totalTokenSupply)}`}</p>
               </div>
             )}
             <br />
@@ -975,7 +971,7 @@ export default function Home() {
           <div>
             {tokenBalanceOf && (
               <div>
-                <p>{`Balance: ${tokenBalanceOf}`}</p>
+                <p>{`${JSON.stringify(tokenBalanceOf)}`}</p>
               </div>
             )}
             <input
