@@ -64,7 +64,10 @@ export default function Home() {
   const handle_submitSurvey = () => {
     contract
       .submitSurvey(ipfshash, surveydeadline, numchoices, atmostchoice)
-      .then((resp) => set_submitSurvey(resp));
+      .then((resp) => {
+        set_submitSurvey(resp);
+        console.log(resp);
+      });
   };
   const handle_takeSurvey = () => {
     //Object.entries(choices) converts the object to an array.
@@ -150,7 +153,7 @@ export default function Home() {
     });
   };
   const handle_donateEther = () => {
-    contract.donateEther(projectid).then((resp) => {
+    contract.donateEther().then((resp) => {
       set_donateEther(resp);
       console.log(resp);
     });
@@ -169,7 +172,12 @@ export default function Home() {
   };
   const handle_submitProjectProposal = () => {
     contract
-      .submitProjectProposal(projectid)
+      .submitProjectProposal(
+        ipfshash,
+        votedeadline,
+        paymentamounts,
+        payschedule
+      )
       .then((resp) => set_submitProjectProposal(resp));
   };
   const handle_getNoOfProjectProposals = () => {
@@ -351,7 +359,7 @@ export default function Home() {
           <div>
             {submitSurvey && (
               <div>
-                <p>{`surveyid: ${submitSurvey.surveyid}`}</p>
+                <p>{`surveyid: ${submitSurvey._hex}`}</p>
               </div>
             )}
             <input
@@ -410,8 +418,8 @@ export default function Home() {
           <div>
             {getSurveyResults && (
               <div>
-                <p>{`numtaken: ${getSurveyResults.numtaken}`}</p>
-                <p>{`results: ${getSurveyResults.results}`}</p>
+                <p>{`numtaken: ${getSurveyResults}`}</p>
+                <p>{`results: ${getSurveyResults}`}</p>
               </div>
             )}
             <input
@@ -452,7 +460,7 @@ export default function Home() {
           <div>
             {getSurveyOwner && (
               <div>
-                <p>{`surveyowner: ${getSurveyOwner.surveyowner}`}</p>
+                <p>{`surveyowner: ${getSurveyOwner}`}</p>
               </div>
             )}
             <input
