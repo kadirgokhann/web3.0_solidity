@@ -377,9 +377,9 @@ contract MyGov is ERC20 {
 		uint[] memory votecountsforpayment = new uint[](paymentamounts.length); 
 
 			
-        transfer(address(this),5);
-        address payable to_sc = payable(address(this));
-        transfer(to_sc, tokenFee ); //if this works, dont uncomment below, TODO
+        transfer(address(this),tokenFee);
+        //address payable to_sc = payable(address(this));
+        //transfer(to_sc, tokenFee ); //if this works, dont uncomment below, TODO
         donatedWei += tokenFee;
 
         projectid = projectProposals.length;

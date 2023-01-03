@@ -280,7 +280,7 @@ export default function Home() {
   };
   const handle_submitProjectProposal = () => {
     const options = {
-      value: ethers.utils.parseEther("1"),
+      value: ethers.utils.parseEther("0.1"),
       from: account,
       gasLimit: 3000000,
     };
