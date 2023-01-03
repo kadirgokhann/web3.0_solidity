@@ -313,28 +313,37 @@ export default function Home() {
       });
   };
   const handle_transferToken = () => {
-    contract.transferToken(to, amount).then((resp) => {
-      set_transferToken(resp);
-      console.log(resp);
-    }).catch((e) => {
-      set_transferToken(e.message);
-    });
+    contract
+      .transferToken(to, amount)
+      .then((resp) => {
+        set_transferToken(resp);
+        console.log(resp);
+      })
+      .catch((e) => {
+        set_transferToken(e.message);
+      });
   };
   const handle_transferTokensFrom = () => {
-    contract.transferTokensFrom(from, to, amount).then((resp) => {
-      set_transferTokensFrom(resp);
-      console.log(resp);
-    }).catch((e) => {
-      set_transferTokensFrom(e.message);
-    });
-
+    contract
+      .transferTokensFrom(from, to, amount)
+      .then((resp) => {
+        set_transferTokensFrom(resp);
+        console.log(resp);
+      })
+      .catch((e) => {
+        set_transferTokensFrom(e.message);
+      });
   };
   const handle_allowanceToken = () => {
-    contract.allowanceToken(owner, spender).then((resp) => {
-      set_allowanceToken(resp);
-      console.log(resp);
-    }).catch((e) => {
-      set_allowanceToken(e.message);
+    contract
+      .allowanceToken(owner, spender)
+      .then((resp) => {
+        set_allowanceToken(resp);
+        console.log(resp);
+      })
+      .catch((e) => {
+        set_allowanceToken(e.message);
+      });
   };
   const handle_approveToken = () => {
     contract.approveToken(spender, amount).then((resp) => {
