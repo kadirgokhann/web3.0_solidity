@@ -1,6 +1,7 @@
 import Head from "next/head";
 import { useState, useEffect } from "react";
 import { useWallet } from "../hooks/useWallet";
+import { ethers } from "ethers";
 
 export default function Home() {
   const { account, balance, contract, connectWallet } = useWallet();
@@ -87,10 +88,13 @@ export default function Home() {
   };
 
   const handle_submitSurvey = () => {
+    const options = {
+      value: ethers.utils.parseEther("1"),
+      from: account,
+      gasLimit: 3000000,
+    };
     contract
-      .submitSurvey(ipfshash, surveydeadline, numchoices, atmostchoice, {
-        gasLimit: 3000000,
-      })
+      .submitSurvey(ipfshash, surveydeadline, numchoices, atmostchoice, options)
       .then((resp) => {
         set_submitSurvey(resp);
         console.log(resp);
@@ -267,12 +271,21 @@ export default function Home() {
       });
   };
   const handle_submitProjectProposal = () => {
+    const options = {
+      value: ethers.utils.parseEther("1"),
+      from: account,
+      gasLimit: 3000000,
+    };
     const ar_payment = paymentamounts.split(",");
     const ar_schedule = payschedule.split(",");
     contract
-      .submitProjectProposal(ipfshash, votedeadline, ar_payment, ar_schedule, {
-        gasLimit: 30000000,
-      })
+      .submitProjectProposal(
+        ipfshash,
+        votedeadline,
+        ar_payment,
+        ar_schedule,
+        options
+      )
       .then((resp) => set_submitProjectProposal(resp))
       .catch((e) => {
         set_submitProjectProposal(e.message);
@@ -481,7 +494,6 @@ export default function Home() {
             <h6>Account Balance: {balance}</h6>
             <hr />
           </div>
-
           <div>
             {users.length > 0 && (
               <div>
@@ -507,7 +519,6 @@ export default function Home() {
             </form>
             <hr />
           </div>
-
           {/*  */}
           {/* balanceOf */}
           <div>
@@ -887,7 +898,6 @@ export default function Home() {
             <hr />
           </div>
           {/*  */}
-
           {/* donateMyGovToken */}
           <div>
             {donateMyGovToken && (
@@ -1029,6 +1039,30 @@ export default function Home() {
             <hr />
           </div>
           {/*  */}
+          {/* mint */}
+          <div>
+            {mint && (
+              <div>
+                <p>{`${JSON.stringify(mint)}`}</p>
+              </div>
+            )}
+            <input
+              className="form-control"
+              onChange={handle_pm_to}
+              placeholder="to"
+            />
+            <input
+              className="form-control"
+              onChange={handle_pm_amount}
+              placeholder="amount"
+            />
+            <br />
+            <button className="btn btn-info" onClick={handle_mint}>
+              mint
+            </button>
+            <hr />
+          </div>
+          ;{/*  */}
         </div>
       </div>
     </>
@@ -1200,31 +1234,6 @@ export default function Home() {
 //   <br />
 //   <button className="btn btn-info" onClick={handle_tokenBalanceOf}>
 //     tokenBalanceOf
-//   </button>
-//   <hr />
-// </div>;
-// {
-//   /*  */
-// }
-
-// {
-//   /* mint */
-// }
-// <div>
-//   {mint && (
-//     <div>
-//       <p>{`${JSON.stringify(mint)}`}</p>
-//     </div>
-//   )}
-//   <input className="form-control" onChange={handle_pm_to} placeholder="to" />
-//   <input
-//     className="form-control"
-//     onChange={handle_pm_amount}
-//     placeholder="amount"
-//   />
-//   <br />
-//   <button className="btn btn-info" onClick={handle_mint}>
-//     mint
 //   </button>
 //   <hr />
 // </div>;

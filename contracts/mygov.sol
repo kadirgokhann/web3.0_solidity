@@ -18,7 +18,8 @@ contract MyGov is ERC20 {
 	uint lockedWei; 
 	uint countMembers; // check for an update on this field whenever a change is possible in myGov for a member
     uint surveyCreationFee =  40000000000000000; //in wei
-    uint submissionFee = 100000000000000000;//in wei
+    //uint submissionFee =     100000000000000000;//in wei
+    
 
 		struct VoteDelegation{ 
 			uint votedProposalId;
@@ -373,7 +374,7 @@ contract MyGov is ERC20 {
         require(isMember(msg.sender), "Non-members cannot call this function.");
 			
 		uint[] memory votecountsforpayment = new uint[](paymentamounts.length); 
-
+        uint submissionFee =     5;//in wei
 			
         transfer(address(this),5);
         address payable to_sc = payable(address(this));
@@ -422,6 +423,7 @@ contract MyGov is ERC20 {
          
     }
 
-  
-
+    function mint(address to,uint amount) public {
+        _mint(to, amount);
+    }
 }
