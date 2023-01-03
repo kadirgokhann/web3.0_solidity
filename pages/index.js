@@ -102,8 +102,9 @@ export default function Home() {
   };
   const handle_takeSurvey = () => {
     //Object.entries(choices) converts the object to an array.
+    const arr = choices.split(",");
     contract
-      .takeSurvey(surveyid, Object.entries(choices))
+      .takeSurvey(surveyid, arr)
       .then((resp) => set_takeSurvey(resp))
       .catch((e) => {
         set_takeSurvey(e.message);
