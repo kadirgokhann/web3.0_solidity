@@ -4,7 +4,7 @@ npx hardhat clean
 
 npx hardhat compile
 
-mv -rf src/artifacts .
+cp -rf src/artifacts .
 
 npx hardhat node
 
