@@ -89,7 +89,7 @@ export default function Home() {
 
   const handle_submitSurvey = () => {
     const options = {
-      value: ethers.utils.parseEther("1"),
+      value: ethers.utils.parseEther("0.4"),
       from: account,
       gasLimit: 3000000,
     };
@@ -107,8 +107,11 @@ export default function Home() {
   const handle_takeSurvey = () => {
     //Object.entries(choices) converts the object to an array.
     const arr = choices.split(",");
+    const options = {
+      gasLimit: 3000000,
+    };
     contract
-      .takeSurvey(surveyid, arr)
+      .takeSurvey(surveyid, arr, options)
       .then((resp) => set_takeSurvey(resp))
       .catch((e) => {
         set_takeSurvey(e.message);
@@ -238,8 +241,13 @@ export default function Home() {
       });
   };
   const handle_donateEther = () => {
+    const options = {
+      value: ethers.utils.parseEther(amount),
+      from: account,
+      gasLimit: 3000000,
+    };
     contract
-      .donateEther({ gasLimit: 3000000 })
+      .donateEther(options)
       .then((resp) => {
         set_donateEther(resp);
         console.log(resp);
@@ -898,6 +906,25 @@ export default function Home() {
             <hr />
           </div>
           {/*  */}
+          {/* donateEther */}
+          <div>
+            {donateEther && (
+              <div>
+                <p>{`${JSON.stringify(donateEther)}`}</p>
+              </div>
+            )}
+            <input
+              className="form-control"
+              onChange={handle_pm_amount}
+              placeholder="amount"
+            />
+            <br />
+            <button className="btn btn-info" onClick={handle_donateEther}>
+              donateEther
+            </button>
+            <hr />{" "}
+          </div>
+          {/*  */}
           {/* donateMyGovToken */}
           <div>
             {donateMyGovToken && (
@@ -1069,25 +1096,6 @@ export default function Home() {
   );
 }
 
-// {/* donateEther */}
-// <div>
-//   {donateEther && (
-//     <div>
-//       <p>{`${JSON.stringify(donateEther)}`}</p>
-//     </div>
-//   )}
-//   <input
-//     className="form-control"
-//     onChange={handle_pm_amount}
-//     placeholder="amount"
-//   />
-//   <br />
-//   <button className="btn btn-info" onClick={handle_donateEther}>
-//     donateEther
-//   </button>
-//   <hr />
-// </div>
-// {/*  */}
 // {
 //   /* transferToken */
 // }

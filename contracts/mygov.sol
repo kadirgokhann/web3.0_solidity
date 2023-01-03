@@ -18,7 +18,7 @@ contract MyGov is ERC20 {
 	uint lockedWei; 
 	uint countMembers; // check for an update on this field whenever a change is possible in myGov for a member
     uint surveyCreationFee =  40000000000000000; //in wei
-    //uint submissionFee =     100000000000000000;//in wei
+    uint tokenFee =     2; // ERC TOKEN / not in wei
     
 
 		struct VoteDelegation{ 
@@ -72,7 +72,8 @@ contract MyGov is ERC20 {
         //return users[useraddress].myGovTokens > 0; todo old version
     }
 
-function submitSurvey(string memory ipfshash,uint surveydeadline,uint numchoices, uint atmostchoice) public payable returns (uint surveyid) {//todo changed to not payable to check
+    function submitSurvey(string memory ipfshash,uint surveydeadline,uint numchoices, uint atmostchoice) public payable returns (uint surveyid) {
+        //todo changed to not payable to check
 		
 		require(isMember(msg.sender), "1");
         require(users[msg.sender].myGovTokens >=2, "1");
@@ -105,8 +106,8 @@ function submitSurvey(string memory ipfshash,uint surveydeadline,uint numchoices
         surveys.push(mysurvey);
         surveyid = surveys.length - 1 ; //push returns the new length of the array, so surveyid is the idx of the survey in the surveys arrat
 		mysurvey.SurveyId = surveyid;
-        (bool sent , bytes memory data) = msg.sender.call{value: msg.value - surveyCreationFee}(""); 
-        require(sent, "failed to refund");
+        //(bool sent , bytes memory data) = msg.sender.call{value: msg.value - surveyCreationFee}(""); 
+        //require(sent, "failed to refund");
         
         return (surveyid);
 	}       // $ transferfrom - DONE tested wo\ ethers
@@ -297,7 +298,7 @@ function submitSurvey(string memory ipfshash,uint surveydeadline,uint numchoices
         //address payable sc = payable(address(this));
 
         //transfer(sc, msg.value);
-        //donatedWei += msg.value ;
+        donatedWei += msg.value ;
     }
 
     receive() external payable{
@@ -374,12 +375,12 @@ function submitSurvey(string memory ipfshash,uint surveydeadline,uint numchoices
         require(isMember(msg.sender), "Non-members cannot call this function.");
 			
 		uint[] memory votecountsforpayment = new uint[](paymentamounts.length); 
-        uint submissionFee =     5;//in wei
+
 			
         transfer(address(this),5);
         address payable to_sc = payable(address(this));
-        transfer(to_sc, submissionFee ); //if this works, dont uncomment below, TODO
-        donatedWei += submissionFee;
+        transfer(to_sc, tokenFee ); //if this works, dont uncomment below, TODO
+        donatedWei += tokenFee;
 
         projectid = projectProposals.length;
             
