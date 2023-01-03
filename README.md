@@ -1,5 +1,7 @@
 Run these sequentially:
 
+npm i
+
 npx hardhat clean
 
 npx hardhat compile
