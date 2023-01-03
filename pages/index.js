@@ -266,14 +266,12 @@ export default function Home() {
       });
   };
   const handle_submitProjectProposal = () => {
+    const ar_payment = paymentamounts.split(",");
+    const ar_schedule = payschedule.split(",");
     contract
-      .submitProjectProposal(
-        ipfshash,
-        votedeadline,
-        paymentamounts,
-        payschedule,
-        { gasLimit: 30000000 }
-      )
+      .submitProjectProposal(ipfshash, votedeadline, ar_payment, ar_schedule, {
+        gasLimit: 30000000,
+      })
       .then((resp) => set_submitProjectProposal(resp))
       .catch((e) => {
         set_submitProjectProposal(e.message);
@@ -888,25 +886,7 @@ export default function Home() {
             <hr />
           </div>
           {/*  */}
-          {/* donateEther */}
-          <div>
-            {donateEther && (
-              <div>
-                <p>{`${JSON.stringify(donateEther)}`}</p>
-              </div>
-            )}
-            <input
-              className="form-control"
-              onChange={handle_pm_amount}
-              placeholder="amount"
-            />
-            <br />
-            <button className="btn btn-info" onClick={handle_donateEther}>
-              donateEther
-            </button>
-            <hr />
-          </div>
-          {/*  */}
+
           {/* donateMyGovToken */}
           <div>
             {donateMyGovToken && (
@@ -1054,6 +1034,25 @@ export default function Home() {
   );
 }
 
+// {/* donateEther */}
+// <div>
+//   {donateEther && (
+//     <div>
+//       <p>{`${JSON.stringify(donateEther)}`}</p>
+//     </div>
+//   )}
+//   <input
+//     className="form-control"
+//     onChange={handle_pm_amount}
+//     placeholder="amount"
+//   />
+//   <br />
+//   <button className="btn btn-info" onClick={handle_donateEther}>
+//     donateEther
+//   </button>
+//   <hr />
+// </div>
+// {/*  */}
 // {
 //   /* transferToken */
 // }

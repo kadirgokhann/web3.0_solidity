@@ -18,9 +18,8 @@ export default function WalletProvider({ children, contractAddress }) {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       const contract = new ethers.Contract(contractAddress, MyGov.abi, signer);
-
-      setContract(contract);
       var Web3 = require("web3");
+      setContract(contract);
       try {
         let accounts = await window.ethereum.request({
           method: "eth_requestAccounts",
@@ -30,10 +29,8 @@ export default function WalletProvider({ children, contractAddress }) {
           method: "eth_getBalance",
           params: [accounts[0], "latest"],
         });
-        const weiValue = Web3.utils.fromWei(
-          parseInt(getBalance, 10).toString(),
-          "ether"
-        );
+        const weiValue = Web3.utils.fromWei(getBalance.toString(), "ether");
+        console.log(getBalance.toString());
         setBalance(weiValue);
       } catch (error) {
         alert(error.message);
