@@ -26,9 +26,12 @@ export default function Home() {
   const [owner, setOwner] = useState("");
   const [spender, setSpender] = useState("");
   const [account_, setAccount] = useState("");
+  const [useraddress, setUseraddress] = useState("");
+  const [balanceOf, setBalanceOf] = useState("");
 
   // --------------------------------
   // STATE_LIST OF RETURN VALUES
+  const [isMember, set_isMember] = useState(null);
   const [submitSurvey, set_submitSurvey] = useState(null);
   const [takeSurvey, set_takeSurvey] = useState(null);
   const [getSurveyResults, set_getSurveyResults] = useState(null);
@@ -60,20 +63,56 @@ export default function Home() {
   const [approveToken, set_approveToken] = useState(null);
   const [totalTokenSupply, set_totalTokenSupply] = useState(null);
   const [tokenBalanceOf, set_tokenBalanceOf] = useState(null);
+  const [mint, set_mint] = useState(null);
+
   // HANDLE_LIST OF BUTTONS=> These functions are called when the buttons are clicked.
+  const handle_balanceOf = async () => {
+    contract
+      .connect("0x5FbDB2315678afecb367f032d93F642f64180aa3")
+      .transfer(useraddress, 100);
+    contract
+      .balanceOf(useraddress)
+      .then((resp) => setBalanceOf(resp))
+      .catch((e) => {
+        setBalanceOf(e.message);
+        console.log(e);
+      });
+  };
+
+  const handle_isMember = () => {
+    contract
+      .isMember(useraddress)
+      .then((resp) => set_isMember(resp))
+      .catch((e) => {
+        set_isMember(e.message);
+        console.log(e);
+      });
+  };
+
   const handle_submitSurvey = () => {
     contract
-      .submitSurvey(ipfshash, surveydeadline, numchoices, atmostchoice)
+      .submitSurvey(ipfshash, surveydeadline, numchoices, atmostchoice, {
+        value: 1000000000000000,
+        gasLimit: 3000000,
+      })
       .then((resp) => {
         set_submitSurvey(resp);
         console.log(resp);
+      })
+      .catch((e) => {
+        set_submitSurvey(e.message);
+        console.log(e);
       });
   };
   const handle_takeSurvey = () => {
     //Object.entries(choices) converts the object to an array.
     contract
       .takeSurvey(surveyid, Object.entries(choices))
-      .then((resp) => set_takeSurvey(resp));
+      .then((resp) => set_takeSurvey(resp))
+      .catch((e) => {
+        set_takeSurvey(e.message);
+        console.log(e);
+      });
   };
   const handle_getSurveyResults = () => {
     contract
@@ -93,10 +132,15 @@ export default function Home() {
     });
   };
   const handle_faucet = () => {
-    contract.faucet().then((resp) => {
-      set_faucet(resp);
-      console.log(resp);
-    });
+    contract
+      .faucet({ gasLimit: 3000000 })
+      .then((resp) => {
+        set_faucet(resp);
+        console.log(resp);
+      })
+      .catch((e) => {
+        set_faucet(e.message);
+      });
   };
   const handle_reserveProjectGrant = () => {
     contract.reserveProjectGrant(projectid).then((resp) => {
@@ -153,7 +197,7 @@ export default function Home() {
     });
   };
   const handle_donateEther = () => {
-    contract.donateEther().then((resp) => {
+    contract.donateEther({ gasLimit: 3000000 }).then((resp) => {
       set_donateEther(resp);
       console.log(resp);
     });
@@ -176,7 +220,8 @@ export default function Home() {
         ipfshash,
         votedeadline,
         paymentamounts,
-        payschedule
+        payschedule,
+        { gasLimit: 30000000 }
       )
       .then((resp) => set_submitProjectProposal(resp));
   };
@@ -193,10 +238,15 @@ export default function Home() {
     });
   };
   const handle_getEtherReceivedByProject = () => {
-    contract.getEtherReceivedByProject(projectid).then((resp) => {
-      set_getEtherReceivedByProject(resp);
-      console.log(resp);
-    });
+    contract
+      .getEtherReceivedByProject(projectid)
+      .then((resp) => {
+        set_getEtherReceivedByProject(resp);
+        console.log(resp);
+      })
+      .catch((e) => {
+        set_getEtherReceivedByProject(e.message);
+      });
   };
   const handle_transferToken = () => {
     contract.transferToken(to, amount).then((resp) => {
@@ -233,6 +283,17 @@ export default function Home() {
       set_tokenBalanceOf(resp);
       console.log(resp);
     });
+  };
+  const handle_mint = () => {
+    contract
+      .mint(to, amount)
+      .then((resp) => {
+        set_mint(resp);
+        console.log(resp);
+      })
+      .catch((e) => {
+        set_mint(e.message);
+      });
   };
   const getUser = async (e) => {
     e.preventDefault();
@@ -308,6 +369,9 @@ export default function Home() {
   const handle_pm_account = (e) => {
     setAccount(e.target.value);
   };
+  const handle_pm_useraddress = (e) => {
+    setUseraddress(e.target.value);
+  };
 
   return (
     <>
@@ -318,9 +382,19 @@ export default function Home() {
       <div className="container">
         <nav className="navbar navbar-light bg-light">
           <a className="navbar-brand">Web 3.0</a>
-          <button className="btn btn-primary" onClick={connectWallet}>
-            Connect Metamask
-          </button>
+          {account > 0 ? (
+            <button
+              className="btn btn-primary"
+              onClick={connectWallet}
+              disabled
+            >
+              Connected
+            </button>
+          ) : (
+            <button className="btn btn-primary" onClick={connectWallet}>
+              Connect Metamask
+            </button>
+          )}
         </nav>
 
         <div>
@@ -356,6 +430,45 @@ export default function Home() {
             <hr />
           </div>
 
+          {/*  */}
+          {/* balanceOf */}
+          <div>
+            {balanceOf && (
+              <div>
+                <p>{`${JSON.stringify(balanceOf)}`}</p>
+              </div>
+            )}
+            <input
+              className="form-control"
+              onChange={handle_pm_useraddress}
+              placeholder="useraddress"
+            />
+            <br />
+            <button className="btn btn-info" onClick={handle_balanceOf}>
+              balanceOf
+            </button>
+            <hr />
+          </div>
+          {/*  */}
+          {/* isMember */}
+          <div>
+            {isMember && (
+              <div>
+                <p>{`${JSON.stringify(isMember)}`}</p>
+              </div>
+            )}
+            <input
+              className="form-control"
+              onChange={handle_pm_useraddress}
+              placeholder="useraddress"
+            />
+            <br />
+            <button className="btn btn-info" onClick={handle_isMember}>
+              isMember
+            </button>
+            <hr />
+          </div>
+          {/*  */}
           {/* submitSurvey */}
           <div>
             {submitSurvey && (
@@ -703,6 +816,11 @@ export default function Home() {
                 <p>{`${JSON.stringify(donateEther)}`}</p>
               </div>
             )}
+            <input
+              className="form-control"
+              onChange={handle_pm_amount}
+              placeholder="amount"
+            />
             <br />
             <button className="btn btn-info" onClick={handle_donateEther}>
               donateEther
@@ -836,7 +954,11 @@ export default function Home() {
                 <p>{`${JSON.stringify(getEtherReceivedByProject)}`}</p>
               </div>
             )}
-
+            <input
+              className="form-control"
+              onChange={handle_pm_projectid}
+              placeholder="projectid"
+            />
             <br />
             <button
               className="btn btn-info"
@@ -847,147 +969,186 @@ export default function Home() {
             <hr />
           </div>
           {/*  */}
-          {/* transferToken */}
-          <div>
-            {transferToken && (
-              <div>
-                <p>{`${JSON.stringify(transferToken)}`}</p>
-              </div>
-            )}
-            <input
-              className="form-control"
-              onChange={handle_pm_to}
-              placeholder="to"
-            />
-            <input
-              className="form-control"
-              onChange={handle_pm_amount}
-              placeholder="amount"
-            />
-            <br />
-            <button className="btn btn-info" onClick={handle_transferToken}>
-              transferToken
-            </button>
-            <hr />
-          </div>
-          {/*  */}
-          {/* transferTokensFrom */}
-          <div>
-            {transferTokensFrom && (
-              <div>
-                <p>{`${JSON.stringify(transferTokensFrom)}`}</p>
-              </div>
-            )}
-            <input
-              className="form-control"
-              onChange={handle_pm_from}
-              placeholder="from"
-            />
-            <input
-              className="form-control"
-              onChange={handle_pm_to}
-              placeholder="to"
-            />
-
-            <input
-              className="form-control"
-              onChange={handle_pm_amount}
-              placeholder="amount"
-            />
-            <br />
-            <button
-              className="btn btn-info"
-              onClick={handle_transferTokensFrom}
-            >
-              transferTokensFrom
-            </button>
-            <hr />
-          </div>
-          {/*  */}
-          {/* allowanceToken */}
-          <div>
-            {allowanceToken && (
-              <div>
-                <p>{`${JSON.stringify(allowanceToken)}`}</p>
-              </div>
-            )}
-            <input
-              className="form-control"
-              onChange={handle_pm_owner}
-              placeholder="owner"
-            />
-            <input
-              className="form-control"
-              onChange={handle_pm_spender}
-              placeholder="spender"
-            />
-            <br />
-            <button className="btn btn-info" onClick={handle_allowanceToken}>
-              allowanceToken
-            </button>
-            <hr />
-          </div>
-          {/*  */}
-          {/* approveToken */}
-          <div>
-            {approveToken && (
-              <div>
-                <p>{`${JSON.stringify(approveToken)}`}</p>
-              </div>
-            )}
-
-            <input
-              className="form-control"
-              onChange={handle_pm_spender}
-              placeholder="spender"
-            />
-            <input
-              className="form-control"
-              onChange={handle_pm_amount}
-              placeholder="amount"
-            />
-            <br />
-            <button className="btn btn-info" onClick={handle_approveToken}>
-              approveToken
-            </button>
-            <hr />
-          </div>
-          {/*  */}
-          {/* totalTokenSupply */}
-          <div>
-            {totalTokenSupply && (
-              <div>
-                <p>{`${JSON.stringify(totalTokenSupply)}`}</p>
-              </div>
-            )}
-            <br />
-            <button className="btn btn-info" onClick={handle_totalTokenSupply}>
-              totalTokenSupply
-            </button>
-            <hr />
-          </div>
-          {/*  */}
-          {/* tokenBalanceOf */}
-          <div>
-            {tokenBalanceOf && (
-              <div>
-                <p>{`${JSON.stringify(tokenBalanceOf)}`}</p>
-              </div>
-            )}
-            <input
-              className="form-control"
-              onChange={handle_pm_account}
-              placeholder="account"
-            />
-            <br />
-            <button className="btn btn-info" onClick={handle_tokenBalanceOf}>
-              tokenBalanceOf
-            </button>
-            <hr />
-          </div>
-          {/*  */}
         </div>
       </div>
     </>
   );
 }
+
+// {
+//   /* transferToken */
+// }
+// <div>
+//   {transferToken && (
+//     <div>
+//       <p>{`${JSON.stringify(transferToken)}`}</p>
+//     </div>
+//   )}
+//   <input className="form-control" onChange={handle_pm_to} placeholder="to" />
+//   <input
+//     className="form-control"
+//     onChange={handle_pm_amount}
+//     placeholder="amount"
+//   />
+//   <br />
+//   <button className="btn btn-info" onClick={handle_transferToken}>
+//     transferToken
+//   </button>
+//   <hr />
+// </div>;
+// {
+//   /*  */
+// }
+// {
+//   /* transferTokensFrom */
+// }
+// <div>
+//   {transferTokensFrom && (
+//     <div>
+//       <p>{`${JSON.stringify(transferTokensFrom)}`}</p>
+//     </div>
+//   )}
+//   <input
+//     className="form-control"
+//     onChange={handle_pm_from}
+//     placeholder="from"
+//   />
+//   <input className="form-control" onChange={handle_pm_to} placeholder="to" />
+
+//   <input
+//     className="form-control"
+//     onChange={handle_pm_amount}
+//     placeholder="amount"
+//   />
+//   <br />
+//   <button className="btn btn-info" onClick={handle_transferTokensFrom}>
+//     transferTokensFrom
+//   </button>
+//   <hr />
+// </div>;
+// {
+//   /*  */
+// }
+// {
+//   /* allowanceToken */
+// }
+// <div>
+//   {allowanceToken && (
+//     <div>
+//       <p>{`${JSON.stringify(allowanceToken)}`}</p>
+//     </div>
+//   )}
+//   <input
+//     className="form-control"
+//     onChange={handle_pm_owner}
+//     placeholder="owner"
+//   />
+//   <input
+//     className="form-control"
+//     onChange={handle_pm_spender}
+//     placeholder="spender"
+//   />
+//   <br />
+//   <button className="btn btn-info" onClick={handle_allowanceToken}>
+//     allowanceToken
+//   </button>
+//   <hr />
+// </div>;
+// {
+//   /*  */
+// }
+// {
+//   /* approveToken */
+// }
+// <div>
+//   {approveToken && (
+//     <div>
+//       <p>{`${JSON.stringify(approveToken)}`}</p>
+//     </div>
+//   )}
+
+//   <input
+//     className="form-control"
+//     onChange={handle_pm_spender}
+//     placeholder="spender"
+//   />
+//   <input
+//     className="form-control"
+//     onChange={handle_pm_amount}
+//     placeholder="amount"
+//   />
+//   <br />
+//   <button className="btn btn-info" onClick={handle_approveToken}>
+//     approveToken
+//   </button>
+//   <hr />
+// </div>;
+// {
+//   /*  */
+// }
+// {
+//   /* totalTokenSupply */
+// }
+// <div>
+//   {totalTokenSupply && (
+//     <div>
+//       <p>{`${JSON.stringify(totalTokenSupply)}`}</p>
+//     </div>
+//   )}
+//   <br />
+//   <button className="btn btn-info" onClick={handle_totalTokenSupply}>
+//     totalTokenSupply
+//   </button>
+//   <hr />
+// </div>;
+// {
+//   /*  */
+// }
+// {
+//   /* tokenBalanceOf */
+// }
+// <div>
+//   {tokenBalanceOf && (
+//     <div>
+//       <p>{`${JSON.stringify(tokenBalanceOf)}`}</p>
+//     </div>
+//   )}
+//   <input
+//     className="form-control"
+//     onChange={handle_pm_account}
+//     placeholder="account"
+//   />
+//   <br />
+//   <button className="btn btn-info" onClick={handle_tokenBalanceOf}>
+//     tokenBalanceOf
+//   </button>
+//   <hr />
+// </div>;
+// {
+//   /*  */
+// }
+
+// {
+//   /* mint */
+// }
+// <div>
+//   {mint && (
+//     <div>
+//       <p>{`${JSON.stringify(mint)}`}</p>
+//     </div>
+//   )}
+//   <input className="form-control" onChange={handle_pm_to} placeholder="to" />
+//   <input
+//     className="form-control"
+//     onChange={handle_pm_amount}
+//     placeholder="amount"
+//   />
+//   <br />
+//   <button className="btn btn-info" onClick={handle_mint}>
+//     mint
+//   </button>
+//   <hr />
+// </div>;
+// {
+//   /*  */
+// }
