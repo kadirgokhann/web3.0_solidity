@@ -18,7 +18,7 @@ contract MyGov is ERC20 {
 	uint lockedWei; 
 	uint countMembers; // check for an update on this field whenever a change is possible in myGov for a member
     uint surveyCreationFee =  40000000000000000; //in wei
-    uint tokenFee =     2; // ERC TOKEN / not in wei
+    uint tokenFee =     5; // ERC TOKEN / not in wei
     
 
 		struct VoteDelegation{ 
