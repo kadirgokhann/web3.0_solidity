@@ -596,7 +596,7 @@ export default function Home() {
             <input
               className="form-control"
               onChange={handle_pm_choices}
-              placeholder="choices"
+              placeholder="choices Ex: 2,3 or  4,5"
             />
 
             <br />
@@ -954,12 +954,12 @@ export default function Home() {
             <input
               className="form-control"
               onChange={handle_pm_paymentamounts}
-              placeholder="paymentamounts"
+              placeholder="paymentamounts Ex: 2,3 or  4,5"
             />
             <input
               className="form-control"
               onChange={handle_pm_payschedule}
-              placeholder="payschedule"
+              placeholder="payschedule Ex: 2,3 or  4,5"
             />
             <br />
             <button
