@@ -72,12 +72,12 @@ contract MyGov is ERC20 {
         //return users[useraddress].myGovTokens > 0; todo old version
     }
 
-    function submitSurvey(string memory ipfshash,uint surveydeadline,uint numchoices, uint atmostchoice) public payable returns (uint surveyid) {//todo changed to not payable to check
+function submitSurvey(string memory ipfshash,uint surveydeadline,uint numchoices, uint atmostchoice) public payable returns (uint surveyid) {//todo changed to not payable to check
 		
 		require(isMember(msg.sender), "1");
         require(users[msg.sender].myGovTokens >=2, "1");
 		require(users[msg.sender].myGovTokens >2  || users[msg.sender].myGovTokensLockedUntil <= block.timestamp, "3"); 
-        require(msg.value >= surveyCreationFee, "Not enough ethers to submit the proposal.");
+        require(msg.value >= surveyCreationFee, "Not enough ethers to submit the survey.");
 		uint[] memory results = new uint[](numchoices) ; 
 
 		//only after all the exceptions are cleared, the survey submission starts
