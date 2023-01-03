@@ -68,9 +68,6 @@ export default function Home() {
   // HANDLE_LIST OF BUTTONS=> These functions are called when the buttons are clicked.
   const handle_balanceOf = async () => {
     contract
-      .connect("0x5FbDB2315678afecb367f032d93F642f64180aa3")
-      .transfer(useraddress, 100);
-    contract
       .balanceOf(useraddress)
       .then((resp) => setBalanceOf(resp))
       .catch((e) => {
@@ -92,7 +89,6 @@ export default function Home() {
   const handle_submitSurvey = () => {
     contract
       .submitSurvey(ipfshash, surveydeadline, numchoices, atmostchoice, {
-        value: 1000000000000000,
         gasLimit: 3000000,
       })
       .then((resp) => {
@@ -143,10 +139,15 @@ export default function Home() {
       });
   };
   const handle_reserveProjectGrant = () => {
-    contract.reserveProjectGrant(projectid).then((resp) => {
-      set_reserveProjectGrant(resp);
-      console.log(resp);
-    });
+    contract
+      .reserveProjectGrant(projectid)
+      .then((resp) => {
+        set_reserveProjectGrant(resp);
+        console.log(resp);
+      })
+      .catch((e) => {
+        set_reserveProjectGrant(e.message);
+      });
   };
   const handle_withdrawProjectPayment = () => {
     contract.withdrawProjectPayment(projectid).then((resp) => {
@@ -155,64 +156,114 @@ export default function Home() {
     });
   };
   const handle_votingforinstallment = () => {
-    contract.votingforinstallment(projectid, choice).then((resp) => {
-      set_votingforinstallment(resp);
-      console.log(resp);
-    });
+    contract
+      .votingforinstallment(projectid, choice)
+      .then((resp) => {
+        set_votingforinstallment(resp);
+        console.log(resp);
+      })
+      .catch((e) => {
+        set_votingforinstallment(e.message);
+      });
   };
   const handle_findSchIndex = () => {
-    contract.findSchIndex(projectid).then((resp) => {
-      set_findSchIndex(resp);
-      console.log(resp);
-    });
+    contract
+      .findSchIndex(projectid)
+      .then((resp) => {
+        set_findSchIndex(resp);
+        console.log(resp);
+      })
+      .catch((e) => {
+        set_findSchIndex(e.message);
+      });
   };
   const handle_getIsProjectFunded = () => {
-    contract.getIsProjectFunded(projectid).then((resp) => {
-      set_getIsProjectFunded(resp);
-      console.log(resp);
-    });
+    contract
+      .getIsProjectFunded(projectid)
+      .then((resp) => {
+        set_getIsProjectFunded(resp);
+        console.log(resp);
+      })
+      .catch((e) => {
+        set_getIsProjectFunded(e.message);
+      });
   };
   const handle_getProjectNextPayment = () => {
-    contract.getProjectNextPayment(projectid).then((resp) => {
-      set_getProjectNextPayment(resp);
-      console.log(resp);
-    });
+    contract
+      .getProjectNextPayment(projectid)
+      .then((resp) => {
+        set_getProjectNextPayment(resp);
+        console.log(resp);
+      })
+      .catch((e) => {
+        set_getProjectNextPayment(e.message);
+      });
   };
   const handle_getProjectOwner = () => {
-    contract.getProjectOwner(projectid).then((resp) => {
-      set_getProjectOwner(resp);
-      console.log(resp);
-    });
+    contract
+      .getProjectOwner(projectid)
+      .then((resp) => {
+        set_getProjectOwner(resp);
+        console.log(resp);
+      })
+      .catch((e) => {
+        set_getProjectOwner(e.message);
+      });
   };
   const handle_getProjectInfo = () => {
-    contract.getProjectInfo(projectid).then((resp) => {
-      set_getProjectInfo(resp);
-      console.log(resp);
-    });
+    contract
+      .getProjectInfo(projectid)
+      .then((resp) => {
+        set_getProjectInfo(resp);
+        console.log(resp);
+      })
+      .catch((e) => {
+        set_getProjectInfo(e.message);
+      });
   };
   const handle_delegateVoteTo = () => {
-    contract.delegateVoteTo(memberaddr, projectid).then((resp) => {
-      set_delegateVoteTo(resp);
-      console.log(resp);
-    });
+    contract
+      .delegateVoteTo(memberaddr, projectid)
+      .then((resp) => {
+        set_delegateVoteTo(resp);
+        console.log(resp);
+      })
+      .catch((e) => {
+        set_delegateVoteTo(e.message);
+      });
   };
   const handle_donateEther = () => {
-    contract.donateEther({ gasLimit: 3000000 }).then((resp) => {
-      set_donateEther(resp);
-      console.log(resp);
-    });
+    contract
+      .donateEther({ gasLimit: 3000000 })
+      .then((resp) => {
+        set_donateEther(resp);
+        console.log(resp);
+      })
+      .catch((e) => {
+        set_donateEther(e.message);
+      });
   };
   const handle_donateMyGovToken = () => {
-    contract.donateMyGovToken(amount).then((resp) => {
-      set_donateMyGovToken(resp);
-      console.log(resp);
-    });
+    contract
+      .donateMyGovToken(amount)
+      .then((resp) => {
+        set_donateMyGovToken(resp);
+        console.log(resp);
+      })
+      .catch((e) => {
+        set_donateMyGovToken(e.message);
+      });
   };
   const handle_voteForProjectProposal = () => {
-    contract.voteForProjectProposal(projectid, choice).then((resp) => {
-      set_voteForProjectProposal(resp);
-      console.log(resp);
-    });
+    contract
+      .voteForProjectProposal(projectid, choice)
+      .then((resp) => {
+        set_voteForProjectProposal(resp);
+        console.log(resp);
+      })
+      .catch((e) => {
+        set_voteForProjectProposal(e.message);
+      });
   };
   const handle_submitProjectProposal = () => {
     contract
@@ -223,19 +274,32 @@ export default function Home() {
         payschedule,
         { gasLimit: 30000000 }
       )
-      .then((resp) => set_submitProjectProposal(resp));
+      .then((resp) => set_submitProjectProposal(resp))
+      .catch((e) => {
+        set_submitProjectProposal(e.message);
+      });
   };
   const handle_getNoOfProjectProposals = () => {
-    contract.getNoOfProjectProposals().then((resp) => {
-      set_getNoOfProjectProposals(resp);
-      console.log(resp);
-    });
+    contract
+      .getNoOfProjectProposals()
+      .then((resp) => {
+        set_getNoOfProjectProposals(resp);
+        console.log(resp);
+      })
+      .catch((e) => {
+        set_getNoOfProjectProposals(e.message);
+      });
   };
   const handle_getNoOfFundedProjects = () => {
-    contract.getNoOfFundedProjects().then((resp) => {
-      set_getNoOfFundedProjects(resp);
-      console.log(resp);
-    });
+    contract
+      .getNoOfFundedProjects()
+      .then((resp) => {
+        set_getNoOfFundedProjects(resp);
+        console.log(resp);
+      })
+      .catch((e) => {
+        set_getNoOfFundedProjects(e.message);
+      });
   };
   const handle_getEtherReceivedByProject = () => {
     contract
@@ -252,19 +316,25 @@ export default function Home() {
     contract.transferToken(to, amount).then((resp) => {
       set_transferToken(resp);
       console.log(resp);
+    }).catch((e) => {
+      set_transferToken(e.message);
     });
   };
   const handle_transferTokensFrom = () => {
     contract.transferTokensFrom(from, to, amount).then((resp) => {
       set_transferTokensFrom(resp);
       console.log(resp);
+    }).catch((e) => {
+      set_transferTokensFrom(e.message);
     });
+
   };
   const handle_allowanceToken = () => {
     contract.allowanceToken(owner, spender).then((resp) => {
       set_allowanceToken(resp);
       console.log(resp);
-    });
+    }).catch((e) => {
+      set_allowanceToken(e.message);
   };
   const handle_approveToken = () => {
     contract.approveToken(spender, amount).then((resp) => {
