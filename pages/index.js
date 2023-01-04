@@ -73,6 +73,7 @@ export default function Home() {
       alert("Please input userId");
       return;
     }
+
     contract
       .balanceOf(userId)
       .then((resp) => {
@@ -155,11 +156,15 @@ export default function Home() {
       from: account,
       gasLimit: 3000000,
     };
+
     contract
       .submitSurvey(ipfshash, surveydeadline, numchoices, atmostchoice, options)
-      .then((resp) => {
-        set_submitSurvey(resp.value._hex + " " + resp.hash);
-        console.log(resp);
+      .then((resp1) => {
+        contract.getNoOfSurveys().then((resp) => {
+          set_getNoOfSurveys(resp._hex);
+          set_submitSurvey("id :" + getNoOfSurveys + " , Hash:" + resp1.hash);
+          console.log(resp);
+        });
       })
       .catch((e) => {
         var regex = /(?:"data":{"message":).*/g;
@@ -591,7 +596,15 @@ export default function Home() {
         ar_schedule,
         options
       )
-      .then((resp) => set_submitProjectProposal(resp))
+      .then((resp1) => {
+        contract.getNoOfSurveys().then((resp) => {
+          set_getNoOfProjectProposals(resp._hex);
+          set_submitProjectProposal(
+            "id :" + getNoOfProjectProposals + " , Hash:" + resp1.hash
+          );
+          console.log(resp);
+        });
+      })
       .catch((e) => {
         var regex = /(?:"data":{"message":).*/g;
         var str = e.message;
