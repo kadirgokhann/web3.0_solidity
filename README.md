@@ -18,6 +18,8 @@ npx hardhat clean
 
 npx hardhat compile
 
+rm -rf artifacts
+
 cp -rf src/artifacts .
 
 Then you can go the option a.

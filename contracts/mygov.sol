@@ -72,7 +72,7 @@ contract MyGov is ERC20 {
         //return users[useraddress].myGovTokens > 0; todo old version
     }
 
-    function submitSurvey(string memory ipfshash,uint surveydeadline,uint numchoices, uint atmostchoice) public payable returns (uint surveyid) {
+    function submitSurvey(string memory ipfshash,uint surveydeadline,uint numchoices, uint atmostchoice) public  payable returns (uint surveyid) {
         //todo changed to not payable to check
 		
 		require(isMember(msg.sender), "1");
@@ -104,7 +104,7 @@ contract MyGov is ERC20 {
         donatedWei += surveyCreationFee; 
        
         surveys.push(mysurvey);
-        surveyid = surveys.length - 1 ; //push returns the new length of the array, so surveyid is the idx of the survey in the surveys arrat
+        surveyid = (surveys.length - 1)+50 ; //push returns the new length of the array, so surveyid is the idx of the survey in the surveys arrat
 		mysurvey.SurveyId = surveyid;
         //(bool sent , bytes memory data) = msg.sender.call{value: msg.value - surveyCreationFee}(""); 
         //require(sent, "failed to refund");

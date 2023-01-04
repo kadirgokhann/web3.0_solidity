@@ -67,26 +67,88 @@ export default function Home() {
   const [mint, set_mint] = useState(null);
 
   // HANDLE_LIST OF BUTTONS=> These functions are called when the buttons are clicked.
+  const getUser = async (e) => {
+    e.preventDefault();
+    if (!userId) {
+      alert("Please input userId");
+      return;
+    }
+    contract
+      .balanceOf(userId)
+      .then((resp) => {
+        if (resp._hex === "0x00") {
+          setBalanceOf("0x00");
+        } else {
+          setBalanceOf(resp._hex);
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+    //resp.myGovTokens._hex +
+    contract
+      .users(userId)
+      .then((resp) => {
+        setUsers(
+          "MyGovTokens : " +
+            balanceOf +
+            ", myGovTokensLockedUntil :" +
+            resp.myGovTokensLockedUntil._hex +
+            ", usedFaucet :" +
+            resp.UsedFaucet
+        );
+        console.log(resp);
+      })
+      .catch((error) => {
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        setUsers(result[0]);
+      });
+  };
   const handle_balanceOf = async () => {
     contract
       .balanceOf(useraddress)
-      .then((resp) => setBalanceOf(resp))
+      .then((resp) => setBalanceOf(resp._hex))
       .catch((e) => {
-        setBalanceOf(e.message);
-        console.log(e);
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        setBalanceOf(result[0]);
       });
   };
-
   const handle_isMember = () => {
     contract
       .isMember(useraddress)
-      .then((resp) => set_isMember(resp))
+      .then((resp) => {
+        if (resp) {
+          set_isMember("Yes");
+        }
+        if (!resp) {
+          set_isMember("No");
+        }
+      })
       .catch((e) => {
-        set_isMember(e.message);
-        console.log(e);
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+        set_isMember(result[0]);
       });
   };
-
   const handle_submitSurvey = () => {
     const options = {
       value: ethers.utils.parseEther("0.4"),
@@ -96,104 +158,262 @@ export default function Home() {
     contract
       .submitSurvey(ipfshash, surveydeadline, numchoices, atmostchoice, options)
       .then((resp) => {
-        set_submitSurvey(resp);
+        set_submitSurvey(resp.value._hex + " " + resp.hash);
         console.log(resp);
       })
       .catch((e) => {
-        set_submitSurvey(e.message);
-        console.log(e);
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(e.message);
+
+        set_submitSurvey(result[0]);
       });
   };
   const handle_takeSurvey = () => {
     //Object.entries(choices) converts the object to an array.
     const arr = choices.split(",");
     const options = {
+      from: account,
       gasLimit: 3000000,
     };
     contract
       .takeSurvey(surveyid, arr, options)
       .then((resp) => set_takeSurvey(resp))
       .catch((e) => {
-        set_takeSurvey(e.message);
-        console.log(e);
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        set_takeSurvey(result[0]);
       });
   };
   const handle_getSurveyResults = () => {
     contract
       .getSurveyResults(surveyid)
-      .then((resp) => set_getSurveyResults(resp));
+      .then((resp) => {
+        set_getSurveyResults(
+          "numtaken : " +
+            resp.numtaken._hex +
+            " ,  results : " +
+            resp.results +
+            ""
+        );
+        console.log(resp);
+      })
+      .catch((e) => {
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        set_getSurveyResults(result[0]);
+      });
   };
   const handle_getSurveyInfo = () => {
-    contract.getSurveyInfo(surveyid).then((resp) => set_getSurveyInfo(resp));
+    contract
+      .getSurveyInfo(surveyid)
+      .then((resp) => {
+        set_getSurveyInfo(
+          "ipfshash : " +
+            resp.ipfshash +
+            " ,  surveydeadline : " +
+            resp.surveydeadline._hex +
+            ", numchoices : " +
+            resp.numchoices._hex +
+            ", atmostchoice : " +
+            resp.atmostchoice._hex
+        );
+        console.log(resp);
+      })
+      .catch((e) => {
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        set_getSurveyInfo(result[0]);
+      });
   };
   const handle_getSurveyOwner = () => {
-    contract.getSurveyOwner(surveyid).then((resp) => set_getSurveyOwner(resp));
+    contract
+      .getSurveyOwner(surveyid)
+      .then((resp) => set_getSurveyOwner(resp))
+      .catch((e) => {
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        set_getSurveyOwner(result[0]);
+      });
   };
   const handle_getNoOfSurveys = () => {
-    contract.getNoOfSurveys().then((resp) => {
-      set_getNoOfSurveys(resp);
-      console.log(resp);
-    });
+    contract
+      .getNoOfSurveys()
+      .then((resp) => {
+        set_getNoOfSurveys(resp._hex);
+        console.log(resp);
+      })
+      .catch((e) => {
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        set_getNoOfSurveys(result[0]);
+      });
   };
   const handle_faucet = () => {
     contract
       .faucet({ gasLimit: 3000000 })
       .then((resp) => {
-        set_faucet(resp);
+        set_faucet("Success");
         console.log(resp);
       })
       .catch((e) => {
-        set_faucet(e.message);
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        set_faucet(result[0]);
       });
   };
   const handle_reserveProjectGrant = () => {
+    const options = {
+      from: account,
+      gasLimit: 3000000,
+    };
     contract
-      .reserveProjectGrant(projectid)
+      .reserveProjectGrant(projectid, options)
       .then((resp) => {
         set_reserveProjectGrant(resp);
         console.log(resp);
       })
       .catch((e) => {
-        set_reserveProjectGrant(e.message);
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        set_reserveProjectGrant(result[0]);
       });
   };
   const handle_withdrawProjectPayment = () => {
-    contract.withdrawProjectPayment(projectid).then((resp) => {
-      set_withdrawProjectPayment(resp);
-      console.log(resp);
-    });
+    const options = {
+      from: account,
+      gasLimit: 3000000,
+    };
+    contract
+      .withdrawProjectPayment(projectid, options)
+      .then((resp) => {
+        set_withdrawProjectPayment(resp);
+        console.log(resp);
+      })
+      .catch((e) => {
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        set_withdrawProjectPayment(result[0]);
+      });
   };
   const handle_votingforinstallment = () => {
+    const options = {
+      from: account,
+      gasLimit: 3000000,
+    };
     contract
-      .votingforinstallment(projectid, choice)
+      .votingforinstallment(projectid, choice, options)
       .then((resp) => {
         set_votingforinstallment(resp);
         console.log(resp);
       })
       .catch((e) => {
-        set_votingforinstallment(e.message);
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        set_votingforinstallment(result[0]);
       });
   };
   const handle_findSchIndex = () => {
+    const options = {
+      from: account,
+      gasLimit: 3000000,
+    };
     contract
-      .findSchIndex(projectid)
+      .findSchIndex(projectid, options)
       .then((resp) => {
-        set_findSchIndex(resp);
+        set_findSchIndex(resp._hex);
         console.log(resp);
       })
       .catch((e) => {
-        set_findSchIndex(e.message);
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        set_findSchIndex(result[0]);
       });
   };
   const handle_getIsProjectFunded = () => {
     contract
       .getIsProjectFunded(projectid)
       .then((resp) => {
-        set_getIsProjectFunded(resp);
+        if (resp === true) {
+          set_getIsProjectFunded("True");
+        }
+        if (resp === false) {
+          set_getIsProjectFunded("False");
+        }
         console.log(resp);
       })
       .catch((e) => {
-        set_getIsProjectFunded(e.message);
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        set_getIsProjectFunded(result[0]);
       });
   };
   const handle_getProjectNextPayment = () => {
@@ -204,7 +424,15 @@ export default function Home() {
         console.log(resp);
       })
       .catch((e) => {
-        set_getProjectNextPayment(e.message);
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        set_getProjectNextPayment(result[0]);
       });
   };
   const handle_getProjectOwner = () => {
@@ -215,29 +443,66 @@ export default function Home() {
         console.log(resp);
       })
       .catch((e) => {
-        set_getProjectOwner(e.message);
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        set_getProjectOwner(result[0]);
       });
   };
   const handle_getProjectInfo = () => {
     contract
       .getProjectInfo(projectid)
       .then((resp) => {
-        set_getProjectInfo(resp);
+        set_getProjectInfo(
+          "ipfshash : " +
+            resp.ipfshash +
+            " , votedeadline " +
+            resp.votedeadline._hex +
+            ", paymentamounts : " +
+            resp.paymentamounts +
+            " , payschedule: " +
+            resp.payschedule
+        );
         console.log(resp);
       })
       .catch((e) => {
-        set_getProjectInfo(e.message);
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        set_getProjectInfo(result[0]);
       });
   };
   const handle_delegateVoteTo = () => {
+    const options = {
+      from: account,
+      gasLimit: 3000000,
+    };
     contract
-      .delegateVoteTo(memberaddr, projectid)
+      .delegateVoteTo(memberaddr, projectid, options)
       .then((resp) => {
         set_delegateVoteTo(resp);
         console.log(resp);
       })
       .catch((e) => {
-        set_delegateVoteTo(e.message);
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        set_delegateVoteTo(result[0]);
       });
   };
   const handle_donateEther = () => {
@@ -249,33 +514,65 @@ export default function Home() {
     contract
       .donateEther(options)
       .then((resp) => {
-        set_donateEther(resp);
+        set_donateEther("Success  Hash:" + resp.hash);
         console.log(resp);
       })
       .catch((e) => {
-        set_donateEther(e.message);
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        set_donateEther(result[0]);
       });
   };
   const handle_donateMyGovToken = () => {
+    const options = {
+      from: account,
+      gasLimit: 3000000,
+    };
     contract
-      .donateMyGovToken(amount)
+      .donateMyGovToken(amount, options)
       .then((resp) => {
-        set_donateMyGovToken(resp);
+        set_donateMyGovToken("Success  Hash:" + resp.hash);
         console.log(resp);
       })
       .catch((e) => {
-        set_donateMyGovToken(e.message);
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        set_donateMyGovToken(result[0]);
       });
   };
   const handle_voteForProjectProposal = () => {
+    const options = {
+      from: account,
+      gasLimit: 3000000,
+    };
     contract
-      .voteForProjectProposal(projectid, choice)
+      .voteForProjectProposal(projectid, choice, options)
       .then((resp) => {
-        set_voteForProjectProposal(resp);
+        set_voteForProjectProposal("Success  Hash:" + resp.hash);
         console.log(resp);
       })
       .catch((e) => {
-        set_voteForProjectProposal(e.message);
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        set_voteForProjectProposal(result[0]);
       });
   };
   const handle_submitProjectProposal = () => {
@@ -296,40 +593,72 @@ export default function Home() {
       )
       .then((resp) => set_submitProjectProposal(resp))
       .catch((e) => {
-        set_submitProjectProposal(e.message);
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        set_submitProjectProposal(result[0]);
       });
   };
   const handle_getNoOfProjectProposals = () => {
     contract
       .getNoOfProjectProposals()
       .then((resp) => {
-        set_getNoOfProjectProposals(resp);
+        set_getNoOfProjectProposals(resp._hex);
         console.log(resp);
       })
       .catch((e) => {
-        set_getNoOfProjectProposals(e.message);
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        set_getNoOfProjectProposals(result[0]);
       });
   };
   const handle_getNoOfFundedProjects = () => {
     contract
       .getNoOfFundedProjects()
       .then((resp) => {
-        set_getNoOfFundedProjects(resp);
+        set_getNoOfFundedProjects(resp._hex);
         console.log(resp);
       })
       .catch((e) => {
-        set_getNoOfFundedProjects(e.message);
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        set_getNoOfFundedProjects(result[0]);
       });
   };
   const handle_getEtherReceivedByProject = () => {
     contract
       .getEtherReceivedByProject(projectid)
       .then((resp) => {
-        set_getEtherReceivedByProject(resp);
+        set_getEtherReceivedByProject(resp._hex);
         console.log(resp);
       })
       .catch((e) => {
-        set_getEtherReceivedByProject(e.message);
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
+
+        set_getEtherReceivedByProject(result[0]);
       });
   };
   const handle_transferToken = () => {
@@ -391,29 +720,22 @@ export default function Home() {
         console.log(resp);
       })
       .catch((e) => {
-        set_mint(e.message);
-      });
-  };
-  const getUser = async (e) => {
-    e.preventDefault();
-    if (!userId) {
-      alert("Please input userId");
-      return;
-    }
-    contract
-      .users(userId)
-      .then((resp) => {
-        setUsers(resp);
-        console.log(resp);
-      })
-      .catch((error) => alert(error));
-  };
+        var regex = /(?:"data":{"message":).*/g;
+        var str = e.message;
+        var result = regex.exec(str);
+        if (result === null) {
+          result = ["Error"];
+        }
+        console.log(result[0]);
 
-  const handleChangeInput = (e) => {
-    setUserId(e.target.value);
+        set_mint(result[0]);
+      });
   };
 
   // HANDLE_LIST OF INPUTS
+  const handleChangeInput = (e) => {
+    setUserId(e.target.value);
+  };
   const handle_pm_ipfshash = (e) => {
     setIpfshash(e.target.value);
   };
@@ -505,11 +827,7 @@ export default function Home() {
           <div>
             {users.length > 0 && (
               <div>
-                <p>{`${JSON.stringify(users)}`}</p>
-                <p>{`Used faucet: ${users.UsedFaucet}`}</p>
-                <p>{`My Gov Tokens: ${users.myGovTokens._hex}`}</p>
-                <p>{`My Gov Tokens Locked Until: ${users.myGovTokensLockedUntil._hex}`}</p>
-                <p>{`${JSON.stringify(users)}`}</p>
+                <p>{`${users}`}</p>
               </div>
             )}
             <form className="form">
