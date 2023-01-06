@@ -29,6 +29,7 @@ export default function Home() {
   const [account_, setAccount] = useState("");
   const [useraddress, setUseraddress] = useState("");
   const [balanceOf, setBalanceOf] = useState("");
+  const [link, setLink] = useState("");
 
   // --------------------------------
   // STATE_LIST OF RETURN VALUES
@@ -229,6 +230,7 @@ export default function Home() {
     contract
       .getSurveyInfo(surveyid)
       .then((resp) => {
+        setLink(resp.ipfshash);
         set_getSurveyInfo(
           "ipfshash : " +
             resp.ipfshash +
@@ -463,6 +465,7 @@ export default function Home() {
     contract
       .getProjectInfo(projectid)
       .then((resp) => {
+        setLink(resp.ipfshash);
         set_getProjectInfo(
           "ipfshash : " +
             resp.ipfshash +
@@ -979,6 +982,7 @@ export default function Home() {
           <div>
             {getSurveyInfo && (
               <div>
+                <a href={link}>Survey Link</a>
                 <p>{`${JSON.stringify(getSurveyInfo)}`}</p>
               </div>
             )}
@@ -1198,6 +1202,7 @@ export default function Home() {
           <div>
             {getProjectInfo && (
               <div>
+                <a href={link}>Project Link</a>
                 <p>{`${JSON.stringify(getProjectInfo)}`}</p>
               </div>
             )}
