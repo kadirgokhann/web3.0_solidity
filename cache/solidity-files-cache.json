@@ -2,14 +2,14 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/kadir42/Documents/web3.0_solidity/contracts/mygov.sol": {
-      "lastModificationDate": 1672819169845,
+      "lastModificationDate": 1672995955770,
       "contentHash": "25f5e73a9a6f4d524e3fdc9ebaa5d0fb",
       "sourceName": "contracts/mygov.sol",
       "solcConfig": {
-        "version": "0.8.3",
+        "version": "0.8.4",
         "settings": {
           "optimizer": {
-            "enabled": false,
+            "enabled": true,
             "runs": 200
           },
           "outputSelection": {
@@ -39,14 +39,14 @@
       ]
     },
     "/Users/kadir42/Documents/web3.0_solidity/node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol": {
-      "lastModificationDate": 1672740086208,
+      "lastModificationDate": 1672999364665,
       "contentHash": "834a0dde221759af42b030253315b086",
       "sourceName": "@openzeppelin/contracts/token/ERC20/ERC20.sol",
       "solcConfig": {
-        "version": "0.8.3",
+        "version": "0.8.4",
         "settings": {
           "optimizer": {
-            "enabled": false,
+            "enabled": true,
             "runs": 200
           },
           "outputSelection": {
@@ -77,50 +77,15 @@
         "ERC20"
       ]
     },
-    "/Users/kadir42/Documents/web3.0_solidity/node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol": {
-      "lastModificationDate": 1672740086608,
-      "contentHash": "ad7c2d0af148c8f9f097d65deeb4da6b",
-      "sourceName": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
-      "solcConfig": {
-        "version": "0.8.3",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "IERC20"
-      ]
-    },
     "/Users/kadir42/Documents/web3.0_solidity/node_modules/@openzeppelin/contracts/utils/Context.sol": {
-      "lastModificationDate": 1672740085970,
+      "lastModificationDate": 1672999364294,
       "contentHash": "5f2c5c4b6af2dd4551027144797bc8be",
       "sourceName": "@openzeppelin/contracts/utils/Context.sol",
       "solcConfig": {
-        "version": "0.8.3",
+        "version": "0.8.4",
         "settings": {
           "optimizer": {
-            "enabled": false,
+            "enabled": true,
             "runs": 200
           },
           "outputSelection": {
@@ -148,14 +113,14 @@
       ]
     },
     "/Users/kadir42/Documents/web3.0_solidity/node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol": {
-      "lastModificationDate": 1672740086618,
+      "lastModificationDate": 1672999365135,
       "contentHash": "909ab67fc5c25033fe6cd364f8c056f9",
       "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
       "solcConfig": {
-        "version": "0.8.3",
+        "version": "0.8.4",
         "settings": {
           "optimizer": {
-            "enabled": false,
+            "enabled": true,
             "runs": 200
           },
           "outputSelection": {
@@ -182,6 +147,41 @@
       ],
       "artifacts": [
         "IERC20Metadata"
+      ]
+    },
+    "/Users/kadir42/Documents/web3.0_solidity/node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol": {
+      "lastModificationDate": 1672999365127,
+      "contentHash": "ad7c2d0af148c8f9f097d65deeb4da6b",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+      "solcConfig": {
+        "version": "0.8.4",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC20"
       ]
     }
   }

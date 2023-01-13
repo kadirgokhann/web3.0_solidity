@@ -30,6 +30,7 @@ export default function Home() {
   const [useraddress, setUseraddress] = useState("");
   const [balanceOf, setBalanceOf] = useState("");
   const [link, setLink] = useState("");
+  const [show_mint, set_show_mint] = useState(false);
 
   // --------------------------------
   // STATE_LIST OF RETURN VALUES
@@ -70,6 +71,7 @@ export default function Home() {
   // HANDLE_LIST OF BUTTONS=> These functions are called when the buttons are clicked.
   const getUser = async (e) => {
     e.preventDefault();
+    console.log(account);
     if (!userId) {
       alert("Please input userId");
       return;
@@ -153,7 +155,7 @@ export default function Home() {
   };
   const handle_submitSurvey = () => {
     const options = {
-      value: ethers.utils.parseEther("0.4"),
+      value: ethers.utils.parseUnits("0.4", 18),
       from: account,
       gasLimit: 3000000,
     };
@@ -515,7 +517,7 @@ export default function Home() {
   };
   const handle_donateEther = () => {
     const options = {
-      value: ethers.utils.parseEther(amount),
+      value: ethers.utils.parseUnits(amount, 18),
       from: account,
       gasLimit: 3000000,
     };
@@ -585,7 +587,7 @@ export default function Home() {
   };
   const handle_submitProjectProposal = () => {
     const options = {
-      value: ethers.utils.parseEther("0.1"),
+      value: ethers.utils.parseUnits("0.1", 18),
       from: account,
       gasLimit: 3000000,
     };
@@ -1420,12 +1422,13 @@ export default function Home() {
               placeholder="amount"
             />
             <br />
-            <button className="btn btn-info" onClick={handle_mint}>
-              mint
-            </button>
+            {account == "0x70997970c51812dc3a010c7d01b50e0d17dc79c8" && (
+              <button className="btn btn-info" onClick={handle_mint}>
+                mint
+              </button>
+            )}
             <hr />
           </div>
-          ;{/*  */}
         </div>
       </div>
     </>
