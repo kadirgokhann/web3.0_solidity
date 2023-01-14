@@ -28,7 +28,7 @@ contract MyGov is ERC20 {
 			
         struct 	User {
             uint myGovTokens; // weight is accumulated by delegation
-            mapping	(uint =>	bool) votedProjectIdsPayment;  // if member has delegated vote, this array is filled anyways. 
+            mapping	(uint =>    uint) votedProjectIdsPayment;  // if member has delegated vote, this array is filled anyways. 
             //The delegated person doesn't store vote it has taken responsibility of in itself.
             mapping	(uint =>	bool) votedProjectIdsProposal;
             mapping	(uint =>	bool) takenSurveyIds;
@@ -166,7 +166,7 @@ contract MyGov is ERC20 {
             (projectProposals.length > projectid) && (projectid >= 0) ,
             "No such project exists with given id.");
 		//require (msg.sender == projectProposals[projectid].owner);
-		require(true, "The deadline has passed."); //???????????
+		require(findSchIndex(projectid) == 0, "The deadline has passed."); //???????????
 		
 		uint totalfunding =0;
 		
@@ -174,19 +174,19 @@ contract MyGov is ERC20 {
 			totalfunding += projectProposals[projectid].paymentAmounts[i];
 			}
 		
-		require(true, "Not enough ethers to fund the project.");
-		lockedWei += projectProposals[projectid].totalFundingWei;
+		require(address(this).balance >= totalfunding, "Not enough ethers to fund the project.");
+		lockedWei += totalfunding;
 		approve(projectProposals[projectid].owner, projectProposals[projectid].paymentAmounts[0]); 
     } //The project owner should call this func before the deadline to reserve the grant
 
-    function withdrawProjectPayment(uint projectid) public {
+    function withdrawProjectPayment(uint projectid) public payable {
         uint idx = findSchIndex(projectid)-1;
 
 		require( // can be that proposalToVote != 0 check too. Not sure about this
             (projectProposals.length > projectid) && (projectid >= 0) ,
             "No such project exists with given id.");
 		require (msg.sender == projectProposals[projectid].owner); // CRUCIAL !! checking if the person tryingg to withdraw is actually the owner of the project
-		require(findSchIndex(projectid) <= projectProposals[projectid].paySchedule.length); //checking if the index in the boundaries of the payschedule array (more installlments than speciified were attempted)
+		require(findSchIndex(projectid) < projectProposals[projectid].paySchedule.length); //checking if the index in the boundaries of the payschedule array (more installlments than speciified were attempted)
         projectProposals[projectid].paySchedule[idx];
         require(true); //Can receive the payment only after the corresponding date in the schedule ASSUMPTION
 
@@ -203,11 +203,7 @@ contract MyGov is ERC20 {
 		donatedWei -= tobelocked;
 
 		address payable owneraddress = payable(msg.sender);
-
-        transferFrom(address(this), owneraddress , tobelocked); //ether is withdrawn
-        _spendAllowance(address(this), owneraddress , tobelocked);
-        
-
+        owneraddress.transfer(tobelocked);
     }        
 
     function votingforinstallment(uint projectid, bool choice) public{
@@ -218,11 +214,10 @@ contract MyGov is ERC20 {
         );
 		//if the vote was delegated for the project proposal, it remains delegated for all the payments.
         User storage voter = users[msg.sender];
-        require(voter.votedProjectIdsPayment[projectid] != true,"User has already voted for this payment.");
+        require(isMember(msg.sender), "User is not a member thus cannot vote.");
+        require(voter.votedProjectIdsPayment[projectid] != idx + 1,"User has already voted for this payment.");
         require(voter.transferredVoteDelegations[projectid] == address(0),"User has delegated someone else to vote for the project.");
-        require(isMember(msg.sender), "User is not a member thus cannot vote.");	
-		require(true); //checking if the index in the boundaries of the payschedule array (more installlments than speciified were attempted)
-	   
+        		   
 		if (choice){
 			projectProposals[projectid].voteCountForProjectPayment[idx] += 1 ;
 		}
@@ -230,8 +225,10 @@ contract MyGov is ERC20 {
 		
 		if (100*yess > (yess + countMembers)){
 			 projectProposals[projectid].allowedToWithdraw[idx] = true;
-             this.increaseAllowance(projectProposals[projectid].owner, projectProposals[projectid].paymentAmounts[idx]);
+             //this.increaseAllowance(projectProposals[projectid].owner, projectProposals[projectid].paymentAmounts[idx]);
 		}
+
+        voter.votedProjectIdsPayment[projectid] = idx + 1;
 		//else{boolarray[projectProposals[projectid].current_payment_month-1] = false;
 		
 	} 
@@ -257,6 +254,7 @@ contract MyGov is ERC20 {
 		else{
 			return true;}
     }
+    //0xd9145CCE52D386f254917e481eB44e9943F39138
 
     function getProjectNextPayment(uint projectid) public view returns(uint next){ //ASSUMPTION THAT IT RETURNS THE NEXT PAYMENT AMOUNT
         uint pro = findSchIndex(projectid);
