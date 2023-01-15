@@ -779,7 +779,9 @@ export default function Home() {
     setIpfshash(e.target.value);
   };
   const handle_pm_surveydeadline = (e) => {
-    setSurveydeadline(e.target.value);
+    //setSurveydeadline(e.target.value);
+    console.log(new Date(e.target.value).valueOf());
+    setSurveydeadline(new Date(e.target.value).valueOf());
   };
   const handle_pm_numchoices = (e) => {
     setNumchoices(e.target.value);
@@ -806,7 +808,9 @@ export default function Home() {
     setAmount(e.target.value);
   };
   const handle_pm_votedeadline = (e) => {
-    setVotedeadline(e.target.value);
+    //setVotedeadline(e.target.value);
+    console.log(new Date(e.target.value).valueOf());
+    setVotedeadline(new Date(e.target.value).valueOf());
   };
   const handle_pm_paymentamounts = (e) => {
     setPaymentamounts(e.target.value);
@@ -963,7 +967,8 @@ export default function Home() {
             <input
               className="form-control"
               onChange={handle_pm_surveydeadline}
-              placeholder="surveydeadline"
+              placeholder="surveydeadline: 2016-01-01T00:00:00.000Z"
+              defaultValue="2099-01-01T00:00:00.000Z"
             />
             <input
               className="form-control"
@@ -1370,7 +1375,7 @@ export default function Home() {
             <input
               className="form-control"
               onChange={handle_pm_votedeadline}
-              placeholder="votedeadline"
+              placeholder="votedeadline: 2016-01-01T00:00:00.000Z"
             />
             <input
               className="form-control"
