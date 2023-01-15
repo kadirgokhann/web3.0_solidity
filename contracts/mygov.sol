@@ -1,85 +1,90 @@
 pragma solidity >=0.7.0 <0.9.0;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";//TODO !!!!!!!!!!!!!!!!!!! change faucet from 5 to 1
 
-contract MyGov is ERC20 { 
+contract MyGov is ERC20 { //Inheriting the ERC20 functions for MyGov token
     
 	uint MyGovSupply;
-    uint currentMyGovSupply; //initially, change the name of currentMyGovSupply to current supply TODO
+    uint currentMyGovSupply; 
 	
 	constructor(uint tokensupply) ERC20("MyGov", "MG") {
         MyGovSupply = tokensupply; //MyGovSupply will never be altered = constant supply. 
         currentMyGovSupply = tokensupply; 
-        _mint(address(this) ,tokensupply);
-		//_mint(msg.sender, tokensupply); 
+        _mint(address(this) ,tokensupply); // Actually creating the token supply
 	}
 
-	uint donatedWei;
-	uint lockedWei; 
-	uint countMembers; // check for an update on this field whenever a change is possible in myGov for a member
-    uint surveyCreationFee =  40000000000000000; //in wei
-    uint tokenFee =     5; // ERC TOKEN / not in wei
+	uint donatedWei;    // Total amount of ethers donated by the users.
+	uint lockedWei;     // Some of the ethers of the contract are to be reserved for funded projects.
+	uint countMembers;  // the code updates this field whenever a change is possible for a user's membership status
     
-
+    uint surveyCreationEtherFee =  40000000000000000; //0.04 ethers in wei
+    uint surveyCreationMyGovFee =  2; 
+    uint projectCreationEtherFee =  100000000000000000; //0.1 ethers in wei
+    uint ProjectCreationMyGovFee = 5; // in MyGov TOKEN 
+    
+    
+        //Each delegation is a struct
 		struct VoteDelegation{ 
 			uint votedProposalId;
-            address delegatingAddress;//origin of the delgation
+            address delegatingAddress;  //origin of the delegation
 		}
 			
         struct 	User {
-            uint myGovTokens; // weight is accumulated by delegation
-            mapping	(uint =>	bool) votedProjectIdsPayment;  // if member has delegated vote, this array is filled anyways. 
-            //The delegated person doesn't store vote it has taken responsibility of in itself.
-            mapping	(uint =>	bool) votedProjectIdsProposal;
+            uint myGovTokens; // weight is accumulated by delegation 
+            // even if a member has delegated their vote, these project arrays are so be filled. 
+            mapping	(uint =>    uint) votedProjectIdsPayment;  // mapping between project id and the payment the user has voted for
+            mapping	(uint =>	bool) votedProjectIdsProposal; //mapping of project ids to the user's state of having already voted
             mapping	(uint =>	bool) takenSurveyIds;
-            VoteDelegation[] assumedVoteDelegations ;  //addresses of people of whom member is voting in nomination of. If delegated, one cannot drop mygov to zero ASSUMPTION!
-            mapping	(uint => address) transferredVoteDelegations; // addresses of who the user has delegated to Mapped wrt projectid
-            uint myGovTokensLockedUntil; //maybe a boolean islocked field?
+            VoteDelegation[] assumedVoteDelegations ;  //addresses of people of whom member is voting in nomination of. Assumption: If delegated, one cannot drop their MyGov balance to zero
+            mapping	(uint => address) transferredVoteDelegations; // addresses of who the user has delegated to, mappedt to projectid
+            uint myGovTokensLockedUntil ; // this field needs to be tracked to make sure a user's membership status isn'T dropped during a vote. (mygov balance != 0)
 			bool UsedFaucet ; //If the user has already got a token from the faucet it is set to true
+            //!!!mapping	(uint =>    uint) voteWeightForProjectId;     
         }
 
 		struct Survey{
-            string Ipfshash; 
+            string Ipfshash;    // later to be used in frontend, stores the URL of the project website created by the project owner
             address Owner; 
             uint Deadline; 
-            uint AtmostChoice; 
-            uint SurveyId;
+            uint AtmostChoice;  //max number of options a member is allowed to choose.
+            uint SurveyId;      //starting from 0 for the first survey, increments by one for each new survey
             uint NumChoices;
-            uint NumTaken;
-            uint [] Results;	
+            uint NumTaken;      //number of times a survey is taken
+            uint [] Results;	//results array counts the votes to indexes corresponding to the survey id.
         }
 		
 		struct ProjectProposal {
-			uint [] voteCountForProjectPayment; //array holding vote numbers for each payment
+			uint [] voteCountForProjectPayment; // array holding vote numbers for each payment
 			uint voteCountForProjectProposal;
-			uint totalFundingWei; //assumption project can only be funded with ethers
+			uint totalFundingWei;   // Assumption: a project can only be funded with ethers
 			uint deadline;
 			uint [] paymentAmounts;
-			uint [] paySchedule; //ASSUMPTION IT HOLDS THE PAYMENT (VOTING) DEADLINES FOR EACH INSTALLMENT 
-			string ipfsHash; // later to be used in writing the frontend
+			uint [] paySchedule;    // Assumption: IT HOLDS THE PAYMENT (VOTING) DEADLINES FOR EACH INSTALLMENT 
+			string ipfsHash;        // later to be used in writing the frontend
 			address owner;
-			bool [] allowedToWithdraw;
+			bool [] allowedToWithdraw; //the installments that the owner is allowed to withdraw
             bool isStillFunded; // can be set to 0 if withdrawal
 		}
     
-    ProjectProposal[] public projectProposals; // the index of a proposal is it's id, // A dynamically-sized array of `Proposal` structs.
-    mapping(address => User) public users; // from user address to user itself// This declares a state variable that stores a `Voter` struct for each possible address.
-    mapping(address => mapping(address => uint256)) private _tokenAllowances;
-    Survey[] public surveys;
+    Survey[] public surveys;  // A dynamically-sized array of `Survey` structs, where the index of a survey is it's id
+    ProjectProposal[] public projectProposals;  // A dynamically-sized array of `Proposal` structs, where the index of a proposal is it's id
+    mapping(address => User) public users;      // from user address to user itself This declares a state variable that stores a User struct for each possible address.
+    
 
     function isMember(address useraddress) public view returns(bool){
         return balanceOf(useraddress)>0;
-        //return users[useraddress].myGovTokens > 0; todo old version
-    }
+    }//
 
-    function submitSurvey(string memory ipfshash,uint surveydeadline,uint numchoices, uint atmostchoice) public  payable returns (uint surveyid) {
-        //todo changed to not payable to check
-		
-		require(isMember(msg.sender), "1");
-        require(users[msg.sender].myGovTokens >=2, "1");
-		require(users[msg.sender].myGovTokens >2  || users[msg.sender].myGovTokensLockedUntil <= block.timestamp, "3"); 
-        require(msg.value >= surveyCreationFee, "Not enough ethers to submit the survey.");
+    function submitSurvey(string memory ipfshash,uint surveydeadline,uint numchoices, uint atmostchoice) public payable returns (uint surveyid) {
+        
+		require(isMember(msg.sender), "1"); // Only members can submit a survey
+        require(balanceOf(msg.sender) >= surveyCreationMyGovFee, "1"); // 
+		require(balanceOf(msg.sender) > surveyCreationMyGovFee  || users[msg.sender].myGovTokensLockedUntil <= block.timestamp, "3"); 
+        require(msg.value >= surveyCreationEtherFee, "Not enough ethers to submit the survey.");
+
 		uint[] memory results = new uint[](numchoices) ; 
+
+        surveyid = surveys.length; // surveyid is the idx of the survey in the surveys array
 
 		//only after all the exceptions are cleared, the survey submission starts
 		Survey memory mysurvey = Survey({
@@ -94,23 +99,24 @@ contract MyGov is ERC20 {
         });
         
 
-        transfer(address(this), 2); //2 tokens from the submitter sent to the SC 
-        //address payable to_sc = payable(address(this));
+        transfer(address(this), surveyCreationMyGovFee); //2 MyGov tokens from the survey submitter(msg.sender) sent to the smart contract.
+        donatedWei += surveyCreationEtherFee; 
         
-        // to do pay the excess back
-         //stuff below not necessary if this works TODO
-        //address payable owneraddress = payable(msg.sender);
-       // transfer(owneraddress , msg.value -surveyCreationFee);
-        donatedWei += surveyCreationFee; 
-       
+        if(!isMember(msg.sender)){
+            countMembers--;
+        }
+
+        //adding the survey to surveys array
         surveys.push(mysurvey);
-        surveyid = (surveys.length - 1)+50 ; //push returns the new length of the array, so surveyid is the idx of the survey in the surveys arrat
 		mysurvey.SurveyId = surveyid;
-        //(bool sent , bytes memory data) = msg.sender.call{value: msg.value - surveyCreationFee}(""); 
-        //require(sent, "failed to refund");
+
+        
+        // paying their change back (msg.value - surveyCreationEtherFee)
+        (bool sent , bytes memory data) = msg.sender.call{value: msg.value - surveyCreationEtherFee}(""); 
+        require(sent, "failed to refund");
         
         return (surveyid);
-	}       // $ transferfrom - DONE tested wo\ ethers
+	}//     
 
     function takeSurvey(uint surveyid,uint [] memory choices) public {
         User storage survee = users[msg.sender];
@@ -120,17 +126,18 @@ contract MyGov is ERC20 {
         
         //start taking the survey
         for(uint i=0; i < choices.length; i++){
-            surveys[surveyid].Results[choices[i]] ++ ; // adding the member's choices to the results [1,3] 3rd option with idx=2 is chosen
+            surveys[surveyid].Results[choices[i]] ++ ; // adding the member's choices to the results
         } 
+
         surveys[surveyid].NumTaken += 1; 
         survee.takenSurveyIds[surveyid] = true;
-    }
+    }//
 
 	function getSurveyResults(uint surveyid) public view returns(uint numtaken, uint [] memory results) {
 		numtaken = surveys[surveyid].NumTaken;
 		results  = surveys[surveyid].Results;
 		return (numtaken, results);
-	}
+	}//
 
 	function getSurveyInfo(uint surveyid) public view returns(string memory ipfshash,uint surveydeadline,uint numchoices, uint atmostchoice) {
 		ipfshash = surveys[surveyid].Ipfshash;
@@ -138,15 +145,15 @@ contract MyGov is ERC20 {
 		numchoices = surveys[surveyid].NumChoices;
 		atmostchoice = surveys[surveyid].AtmostChoice;
 		return( ipfshash, surveydeadline, numchoices, atmostchoice);
-	}
+	}//
 
 	function getSurveyOwner(uint surveyid) public view returns(address surveyowner){
 		return (surveys[surveyid].Owner);
-	}
+	}//
 
 	function getNoOfSurveys() public view returns(uint numsurveys){
 		return (surveys.length);
-	}
+	}//
 
 	function faucet() public {
 
@@ -154,118 +161,128 @@ contract MyGov is ERC20 {
 		require ( (currentMyGovSupply) > 0,"No more tokens left in the contract.");
 		require(users[spender].UsedFaucet == false, "You already used the faucet.");
     
-        this.transfer(spender, 5); //  msg sender issue //TODO CHANGE IT BACK TO 1,AFTER TESTING SUBMISION
-        users[spender].UsedFaucet = true; // todo probably dont need this anymore, but then would have to make the all
-        users[spender].myGovTokens +=5;
-	}       // $ transfer - DONE
+        this.transfer(spender, 5); //  transfering 1 mygov token from the contract to the user calling the function (aka msg.sender) //TODO CHANGE IT BACK TO 1,AFTER TESTING SUBMISION
+        users[spender].UsedFaucet = true; //this is crucial, otherwise a malicious user could drain the contract
+        users[spender].myGovTokens += 5;  //todo dont need it anymore
+
+        countMembers++;
+        
+	}//  
 		
     function reserveProjectGrant(uint projectid) public{
 
 		require(getIsProjectFunded(projectid),"Project not funded.");
-		require( // can be that proposalToVote != 0 check too. Not sure about this
+		require( 
             (projectProposals.length > projectid) && (projectid >= 0) ,
             "No such project exists with given id.");
-		//require (msg.sender == projectProposals[projectid].owner);
-		require(true, "The deadline has passed."); //???????????
-		
-		uint totalfunding =0;
+		require (msg.sender == projectProposals[projectid].owner);
+		require(findSchIndex(projectid) == 0, "The deadline has passed."); //??????????? or the one below?
+		require (projectProposals[projectid].deadline >= block.timestamp, "Deadline exceeded."); // checking if the deadline is here yet.
+
+		uint totalfunding = 0;
 		
 		for(uint i=0;i < projectProposals[projectid].paymentAmounts.length;i++){
 			totalfunding += projectProposals[projectid].paymentAmounts[i];
-			}
+		}
 		
-		require(true, "Not enough ethers to fund the project.");
-		lockedWei += projectProposals[projectid].totalFundingWei;
-		approve(projectProposals[projectid].owner, projectProposals[projectid].paymentAmounts[0]); 
-    } //The project owner should call this func before the deadline to reserve the grant
-
+		require(address(this).balance >= totalfunding, "Not enough ethers to fund the project.");
+		lockedWei += totalfunding;
+        //projectProposals[projectid].allowedToWithdraw[0] = true;//first payment is approved by default, but a vote will be necessary for next payments
+		//delete approve(projectProposals[projectid].owner, projectProposals[projectid].paymentAmounts[0]); ??? msg.sender is calling this function. the approval wont go through?
+    } 
     function withdrawProjectPayment(uint projectid) public {
-        uint idx = findSchIndex(projectid)-1;
-
-		require( // can be that proposalToVote != 0 check too. Not sure about this
-            (projectProposals.length > projectid) && (projectid >= 0) ,
-            "No such project exists with given id.");
-		require (msg.sender == projectProposals[projectid].owner); // CRUCIAL !! checking if the person tryingg to withdraw is actually the owner of the project
-		require(findSchIndex(projectid) <= projectProposals[projectid].paySchedule.length); //checking if the index in the boundaries of the payschedule array (more installlments than speciified were attempted)
-        projectProposals[projectid].paySchedule[idx];
-        require(true); //Can receive the payment only after the corresponding date in the schedule ASSUMPTION
+        int indx = int(findSchIndex(projectid))-1;// index of last payment to be withdrawn
+		require(indx != -1, "The voting for the installment still ongoing");
+        require( (projectProposals.length > projectid) && (projectid >= 0) , "No such project exists with given id.");
+		require (msg.sender == projectProposals[projectid].owner); // CRUCIAL: checking if the person trying to withdraw is actually the owner of the project
+		require(findSchIndex(projectid) < projectProposals[projectid].paySchedule.length); //checking if the index in the boundaries of the payschedule array (more installlments than specified were attempted)
+        uint idx = findSchIndex(projectid) -1;
+        require(projectProposals[projectid].paySchedule[idx]<= block.timestamp); //ASSUMPTION : Can receive the payment only after the corresponding date in the schedule 
+        
 
 		uint tobelocked = 0 ;
-		ProjectProposal memory p = projectProposals[projectid]; 
+		ProjectProposal memory  p= projectProposals[projectid]; 
 		
-		for(uint i=0;i <= idx; i++){ //When the user calls the w,thdraw function they will withdraw all awaiting approved payments 
+		for(uint i=0;i <= idx; i++){ //When the user calls the withdraw function they will withdraw all awaiting approved payments, but not the next payment (whose idx found by findschindex) 
 			if(p.allowedToWithdraw[i]){
 				tobelocked += p.paymentAmounts[i];
+                projectProposals[projectid].allowedToWithdraw[i]=false;
 			}
 		}
 		
 		lockedWei -= tobelocked;
 		donatedWei -= tobelocked;
 
-		address payable owneraddress = payable(msg.sender);
-
-        transferFrom(address(this), owneraddress , tobelocked); //ether is withdrawn
-        _spendAllowance(address(this), owneraddress , tobelocked);
-        
-
-    }        
+        (bool sent , bytes memory data) = msg.sender.call{value: tobelocked}(""); //sending the funds to the project owner
+        require(sent, "failed to refund");
+    } //      
 
     function votingforinstallment(uint projectid, bool choice) public{
-        uint idx = findSchIndex(projectid);
-		require( // can be that proposalToVote != 0 check too. Not sure about this
-            (projectProposals.length > projectid) && (projectid >= 0) ,
-            "No such project exists with given id."
-        );
+        uint indx = findSchIndex(projectid)+1; // index of  payment to be voted
+		require( (projectProposals.length > projectid) && (projectid >= 0) ,"No such project exists with given id.");
 		//if the vote was delegated for the project proposal, it remains delegated for all the payments.
         User storage voter = users[msg.sender];
-        require(voter.votedProjectIdsPayment[projectid] != true,"User has already voted for this payment.");
+        require(isMember(msg.sender), "User is not a member thus cannot vote.");
+        require(voter.votedProjectIdsPayment[projectid] != indx ,"User has already voted for this payment.");
         require(voter.transferredVoteDelegations[projectid] == address(0),"User has delegated someone else to vote for the project.");
-        require(isMember(msg.sender), "User is not a member thus cannot vote.");	
-		require(true); //checking if the index in the boundaries of the payschedule array (more installlments than speciified were attempted)
-	   
-		if (choice){
+        require(indx-1 <  projectProposals[projectid].paySchedule.length, "vote deadlines has passed.");
+       
+        uint idx = findSchIndex(projectid); // index of  payment to be voted
+
+        /*if(choice){
+            projectProposals[projectid].voteCountForProjectPayment[idx] += users[msg.sender].voteWeightForProjectId[projectid]+1;
+        }*/
+        if (choice){
 			projectProposals[projectid].voteCountForProjectPayment[idx] += 1 ;
 		}
-		uint yess = projectProposals[projectid].voteCountForProjectPayment[idx];
+    
+        uint yess = projectProposals[projectid].voteCountForProjectPayment[idx];
 		
-		if (100*yess > (yess + countMembers)){
-			 projectProposals[projectid].allowedToWithdraw[idx] = true;
-             this.increaseAllowance(projectProposals[projectid].owner, projectProposals[projectid].paymentAmounts[idx]);
+        if(countMembers <= 100*(yess)){
+            projectProposals[projectid].isStillFunded = true;
+             projectProposals[projectid].allowedToWithdraw[idx] = true;
+             //this.increaseAllowance(projectProposals[projectid].owner, projectProposals[projectid].paymentAmounts[idx]);
+             //approve(projectProposals[projectid].owner, projectProposals[projectid].paymentAmounts[idx]);
 		}
+		else{
+            projectProposals[projectid].isStillFunded = false;
+		}
+
+        voter.votedProjectIdsPayment[projectid] = indx; //this mapping hold the idx+1 since its default is 0, it would cause issues to set it to idx .
 		//else{boolarray[projectProposals[projectid].current_payment_month-1] = false;
 		
-	} 
+	} //TODO DEADLINE CHECK
 		
 	// return which index we are currently at in our paysch array
     function findSchIndex(uint projectid) public view returns (uint idx){//ASSUMPTION a month is always 30 days 
         //uint[] memory payschedule = projectProposals[projectid].paySchedule;
-        for(uint i = 0; i < projectProposals[projectid].paySchedule.length; i++){ 
+        for(uint i = 0; i < projectProposals[projectid].paySchedule.length; i++){ //returns the first payment whose payment date is not here yet
             if(block.timestamp < projectProposals[projectid].paySchedule[i]){
                 return i;
             }
         }
-        return  projectProposals[projectid].paySchedule.length;
-    }
+
+        return  projectProposals[projectid].paySchedule.length; //a nonexistent index to indicate that all payments are made
+    }//
 
     function getIsProjectFunded(uint projectid) public view returns(bool funded){ //todo is project still funded or was ever funded???
-		require( // can be that proposalToVote != 0 check too. Not sure about this
-            (projectProposals.length > projectid) && (projectid >= 0) ,
-            "No such project exists with given id.");	
+		require(  (projectProposals.length > projectid) && (projectid >= 0) ,"No such project exists with given id.");	
 
 		if(projectProposals[projectid].isStillFunded){
 			return true;}
 		else{
-			return true;}
-    }
+			return false;}
+    }//
+    
 
-    function getProjectNextPayment(uint projectid) public view returns(uint next){ //ASSUMPTION THAT IT RETURNS THE NEXT PAYMENT AMOUNT
-        uint pro = findSchIndex(projectid);
-		return projectProposals[projectid].paymentAmounts[pro];//ASSUMPTION this month since we assume payment can be withdrawn at the end of the month
-    }
+    function getProjectNextPayment(uint projectid) public view returns(uint next){ //ASSUMPTION THAT IT RETURNS THE this months PAYMENT AMOUNT, but it can be only withdrawn at the end of the month, so it is technically the next payment
+        uint idx = findSchIndex(projectid);
+		return projectProposals[projectid].paymentAmounts[idx];//ASSUMPTION: returns current payment amount since we assume the payment can be withdrawn at the end of the month
+    } // returns this current payment, that is about to be made
 
     function getProjectOwner(uint projectid) public view returns(address projectowner){
 		return projectProposals[projectid].owner;
-    }
+    }//
 
     function getProjectInfo(uint projectid) public view returns(string memory ipfshash, uint votedeadline,uint [] memory paymentamounts, uint [] memory payschedule){
 		ipfshash = projectProposals[projectid].ipfsHash;
@@ -273,9 +290,10 @@ contract MyGov is ERC20 {
 		paymentamounts = projectProposals[projectid].paymentAmounts;
 		payschedule = projectProposals[projectid].paySchedule;
 		return (ipfshash,votedeadline,paymentamounts,payschedule);
-    }
+    }//
 
     function delegateVoteTo(address memberaddr, uint projectid) public payable{
+       
         //check if the delegating person has right to vote ASSUMPTION self delegation is disabled
         address to = memberaddr;
         address from = msg.sender; //if the caller of function isn't a member the method will be reverted
@@ -283,6 +301,8 @@ contract MyGov is ERC20 {
         require(isMember(from),"Non-members don't have the right to vote thus no right to delegate.");
         require(from != to,"Self-delegation is not possible.");
         require(users[from].transferredVoteDelegations[projectid] == address(0),"The delegation has already happened.");
+        require(users[to].transferredVoteDelegations[projectid] == address(0),"The person to be delagated has already delegated their vote to someone else");
+        require(users[to].votedProjectIdsProposal[projectid]==false,"Delegation to a member who has already voted is not possible") ; 
 
         users[to].assumedVoteDelegations.push(VoteDelegation({
                 votedProposalId: projectid,
@@ -290,54 +310,73 @@ contract MyGov is ERC20 {
             }));
 
         users[from].transferredVoteDelegations[projectid] = to;
-    }
+       
+       
+       /* //check if the delegating person has right to vote ASSUMPTION self delegation is disabled
+   
+        users[to].assumedVoteDelegations.push(VoteDelegation({
+                votedProposalId: projectid,
+                delegatingAddress: from
+            }));
+
+        users[from].transferredVoteDelegations[projectid] = to;
+        
+        User storage voter = users[to];
+
+        for(uint i = 0; i < users[to].assumedVoteDelegations.length; i++){
+            VoteDelegation memory voteDelegation = voter.assumedVoteDelegations[i];
+            if((voteDelegation.votedProposalId == projectid)){  // todo , change storage
+                    users[to].voteWeightForProjectId[projectid] += users[users[msg.sender].assumedVoteDelegations[i].delegatingAddress].voteWeightForProjectId[projectid] +1;
+                    users[users[msg.sender].assumedVoteDelegations[i].delegatingAddress].voteWeightForProjectId[projectid] = 0;
+            }
+        }*/
+        
+    }// WHAT IF... the respresentative also delegated his vote?????? todo!!!!!!!!!!!!!
  
     function donateEther() public payable{
-        //see if we need to check message sender's balance compared to the eth amount it wants to send, --------------------- BUT HOW ABOUT THE DONORS BALANCE'S DECREASE????--------------
-        //transferFrom(msg.sender,address(this), msg.value);
-        //address payable sc = payable(address(this));
+        donatedWei += msg.value ; //payable donate function receiving the ether amount to be donated directly from msg.value
+    }//
 
-        //transfer(sc, msg.value);
+    receive() external payable{ 
         donatedWei += msg.value ;
-    }
-
-    receive() external payable{
-        donatedWei += msg.value ;
-    }
+    }//
 
 
     function donateMyGovToken(uint amount) public {
         require(
-            users[msg.sender].myGovTokens >= amount,
+            balanceOf(msg.sender) >= amount,
             "Insufficient MyGovTokens balance for entered donation amount."
         );
 
         require(
-            ( users[msg.sender].myGovTokens > amount || (users[msg.sender].myGovTokensLockedUntil <= block.timestamp)),
+            ( balanceOf(msg.sender) > amount || (users[msg.sender].myGovTokensLockedUntil <= block.timestamp)),
             "User cannot drop it's member status during voting."
         );
 
-        users[msg.sender].myGovTokens -=amount; //todo  switch all .mygovtokens to balanceof 
-        transfer(address(this), amount);
-
+        transfer(address(this), amount); // transfering the donation from user's (msg.sender's) account
+        users[msg.sender].myGovTokens -=amount; // todo delete all mygovtokens fields?
+        if(!isMember(msg.sender)){
+            countMembers--;
+        }
   
-    } // $ transferfrom done
+    } 
+
 
     //when a voter is voting, it also uses the votes it has been delegated at exactly that moment
-    //ASSUMPTION: a prject name cant be zero (or whatever the default value is)
-    function voteForProjectProposal(uint projectid,bool choice) public {
-      //ProjectProposal memory proposalToVote = projectProposals[projectid];
-        require( // can be that proposalToVote != 0 check too. Not sure about this
+    //Assumption: a project name cant be zero (or whatever the default value is)
+
+    function voteForProjectProposal(uint projectid,bool choice) public { 
+     
+        require( 
             (projectProposals.length > projectid) && (projectid >= 0) ,
             "No such project exists with given id.");
 
-        User storage voter = users[msg.sender]; // todo change to users[]
+        User storage voter = users[msg.sender]; // todo change to users[]???
         require(voter.votedProjectIdsProposal[projectid] != true,"User has already voted");
         require(voter.transferredVoteDelegations[projectid] == address(0),"User has delegated someone else to vote for the project.");
         require(isMember(msg.sender), "User is not a member thus cannot vote.");
         
-       
-        //first vote for own
+         //first vote for own
         voter.votedProjectIdsProposal[projectid] = true;
         if(choice){
             projectProposals[projectid].voteCountForProjectProposal++;
@@ -362,6 +401,32 @@ contract MyGov is ERC20 {
                 }
             }
         }
+        /*
+        //first vote for own
+        users[msg.sender].votedProjectIdsProposal[projectid] = true;
+        
+        
+        if(users[msg.sender].myGovTokensLockedUntil < projectProposals[projectid].deadline){
+            users[msg.sender].myGovTokensLockedUntil = projectProposals[projectid].deadline;
+        }
+
+        for(uint i = 0; i < voter.assumedVoteDelegations.length; i++){
+            VoteDelegation memory voteDelegation = voter.assumedVoteDelegations[i];
+            
+            if((voteDelegation.votedProposalId == projectid)){  // todo , change storage
+                //User storage delegated = users[voteDelegation.delegatingAddress];
+                if(!users[voteDelegation.delegatingAddress].votedProjectIdsProposal[projectid]){
+                    users[voteDelegation.delegatingAddress].votedProjectIdsProposal[projectid] = true;
+                    if( users[voteDelegation.delegatingAddress].myGovTokensLockedUntil < projectProposals[projectid].deadline){
+                        users[voteDelegation.delegatingAddress].myGovTokensLockedUntil = projectProposals[projectid].deadline;
+                    }
+                }
+            }
+        }
+
+        if(choice){
+            projectProposals[projectid].voteCountForProjectProposal += users[msg.sender].voteWeightForProjectId[projectid]+1;
+        }*/
 
         if(countMembers <= 10*(projectProposals[projectid].voteCountForProjectProposal)){
             projectProposals[projectid].isStillFunded = true;
@@ -369,23 +434,24 @@ contract MyGov is ERC20 {
 		else{
             projectProposals[projectid].isStillFunded = false;
 		}
-    }
+    } //TODO DEADLINE CHECK
     
     function submitProjectProposal(string memory ipfshash, uint votedeadline, uint [] memory paymentamounts, uint [] memory payschedule) public payable returns (uint projectid) {
         require(isMember(msg.sender), "Non-members cannot call this function.");
-			
-		uint[] memory votecountsforpayment = new uint[](paymentamounts.length); 
+		require(balanceOf(msg.sender) >= ProjectCreationMyGovFee, "1"); 
+		require(balanceOf(msg.sender) > ProjectCreationMyGovFee  || users[msg.sender].myGovTokensLockedUntil <= block.timestamp, "3"); //since user cannot drop their membership status
+        require(msg.value >= projectCreationEtherFee, "Not enough ethers to submit the survey.");
+		
+        uint[] memory votecountsforpayment = new uint[](paymentamounts.length); 
 
 			
-        transfer(address(this),tokenFee);
-        //address payable to_sc = payable(address(this));
-        //transfer(to_sc, tokenFee ); //if this works, dont uncomment below, TODO
-        donatedWei += tokenFee;
+        transfer(address(this),ProjectCreationMyGovFee);
+        donatedWei += ProjectCreationMyGovFee;
 
         projectid = projectProposals.length;
             
         ProjectProposal memory p = ProjectProposal({
-            voteCountForProjectPayment: votecountsforpayment,//new uint[](paymentamounts.length),
+            voteCountForProjectPayment: votecountsforpayment,
             voteCountForProjectProposal: 0,
             totalFundingWei: 0,
             deadline: votedeadline,
@@ -393,17 +459,27 @@ contract MyGov is ERC20 {
             paySchedule: payschedule,
             ipfsHash: ipfshash,
             owner: msg.sender,
-			allowedToWithdraw: new bool[](paymentamounts.length), // another way to initialize whole array to false PAT KUT CAT
+			allowedToWithdraw: new bool[](paymentamounts.length), 
             isStillFunded : false
         });
 
-        projectProposals.push(p); //project submitted	
+        //adding the survey to proposals array
+        projectProposals.push(p); //project submitted by adding the projectproposal instance to the array	
+
+        // paying their change back (msg.value - surveyCreationEtherFee)
+        (bool sent , bytes memory data) = msg.sender.call{value: msg.value - projectCreationEtherFee}(""); 
+        require(sent, "failed to refund");
+
+        if(!isMember(msg.sender)){
+            countMembers --;
+        }
+
         return projectid;
-    }   // $ transferfrom - DONE - tested wo ethers
+    }   
 
     function getNoOfProjectProposals() public view returns(uint numproposals){
         return projectProposals.length;
-    }
+    }//
 
     function getNoOfFundedProjects () public view returns(uint numfunded){
         uint count = 0;
@@ -413,18 +489,20 @@ contract MyGov is ERC20 {
             }
         }
         return count;
-    }
+    }//
 
     function getEtherReceivedByProject (uint projectid) public view returns(uint amount){
-        require(
-            projectProposals.length > projectid,
-            "No project proposal with given id exists."
-        );
+        require( 
+            (projectProposals.length > projectid) && (projectid >= 0) ,
+            "No such project exists with given id.");
+
         return projectProposals[projectid].totalFundingWei;
          
-    }
+    }//
 
-    function mint(address to,uint amount) public {
+    function mint(address to,uint amount) public { // defined here again in order to speed up testing.
         _mint(to, amount);
-    }
+    }//
+
+  
 }

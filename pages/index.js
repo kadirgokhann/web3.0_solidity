@@ -115,6 +115,15 @@ export default function Home() {
         setUsers(result[0]);
       });
   };
+  const txHistory = async (e) => {
+    e.preventDefault();
+    // get request
+    const url = "http://bounance.online:8000/entries";
+    const response = await fetch(url);
+    const data = await response.json();
+    console.log(data);
+  };
+
   const handle_balanceOf = async () => {
     contract
       .balanceOf(useraddress)
@@ -153,7 +162,7 @@ export default function Home() {
         set_isMember(result[0]);
       });
   };
-  const handle_submitSurvey = () => {
+  const handle_submitSurvey = async () => {
     const options = {
       value: ethers.utils.parseUnits("0.4", 18),
       from: account,
@@ -165,6 +174,12 @@ export default function Home() {
       .then((resp1) => {
         contract.getNoOfSurveys().then((resp) => {
           set_getNoOfSurveys(resp._hex);
+          const submit = fetch(
+            "http://bounance.online:8000/entry?user=" +
+              userId +
+              "&tx=" +
+              resp1.hash
+          );
           set_submitSurvey("id :" + getNoOfSurveys + " , Hash:" + resp1.hash);
           console.log(resp);
         });
@@ -608,6 +623,12 @@ export default function Home() {
             "id :" + getNoOfProjectProposals + " , Hash:" + resp1.hash
           );
           console.log(resp);
+          const submit = fetch(
+            "http://bounance.online:8000/entry?user=" +
+              account +
+              "&tx=" +
+              resp1.hash
+          );
         });
       })
       .catch((e) => {
@@ -821,6 +842,9 @@ export default function Home() {
       <div className="container">
         <nav className="navbar navbar-light bg-light">
           <a className="navbar-brand">Web 3.0</a>
+          <button className="btn btn-primary" onClick={txHistory}>
+            TX HISTORY
+          </button>
           {account > 0 ? (
             <button
               className="btn btn-primary"
@@ -898,6 +922,28 @@ export default function Home() {
             <br />
             <button className="btn btn-info" onClick={handle_isMember}>
               isMember
+            </button>
+            <hr />
+          </div>
+          {/*  */}
+          {/* reserveProjectGrant */}
+          <div>
+            {reserveProjectGrant && (
+              <div>
+                <p>{`${JSON.stringify(reserveProjectGrant)}`}</p>
+              </div>
+            )}
+            <input
+              className="form-control"
+              onChange={handle_pm_projectid}
+              placeholder="projectid"
+            />
+            <br />
+            <button
+              className="btn btn-info"
+              onClick={handle_reserveProjectGrant}
+            >
+              reserveProjectGrant
             </button>
             <hr />
           </div>
