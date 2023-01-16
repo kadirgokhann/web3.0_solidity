@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/kadir42/Documents/web3.0_solidity/contracts/mygov.sol": {
-      "lastModificationDate": 1672995955770,
-      "contentHash": "25f5e73a9a6f4d524e3fdc9ebaa5d0fb",
+      "lastModificationDate": 1673854722426,
+      "contentHash": "495201afd2eae257d951282e903d2782",
       "sourceName": "contracts/mygov.sol",
       "solcConfig": {
         "version": "0.8.4",

@@ -16,11 +16,18 @@ module.exports = {
   },
   networks: {
     // Configure each network to the respective Avalanche instances
-    bloxberg: {
-      url: SHARDEUM_RPC,
-      accounts: [privateKey],
-      chainId: 8080,
+    hardhat: {
+      chainId: 1337,
+      allowUnlimitedContractSize: true,
+      gas: 2100000,
+      gasPrice: 8000000000,
+      gasLimit: 8000000,
     },
+    // bloxberg: {
+    //   url: SHARDEUM_RPC,
+    //   accounts: [privateKey],
+    //   chainId: 8080,
+    // },
   },
 };
 

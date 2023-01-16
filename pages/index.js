@@ -2,6 +2,7 @@ import Head from "next/head";
 import { useState, useEffect } from "react";
 import { useWallet } from "../hooks/useWallet";
 import { ethers } from "ethers";
+import moment from "moment";
 
 export default function Home() {
   const { account, balance, contract, connectWallet } = useWallet();
@@ -248,11 +249,14 @@ export default function Home() {
       .getSurveyInfo(surveyid)
       .then((resp) => {
         setLink(resp.ipfshash);
+        console.log(resp);
         set_getSurveyInfo(
           "ipfshash : " +
             resp.ipfshash +
             " ,  surveydeadline : " +
-            resp.surveydeadline._hex +
+            moment(resp.surveydeadline._hex * 1000).format(
+              "YYYY-MM-DD hh:mm:ss"
+            ) +
             ", numchoices : " +
             resp.numchoices._hex +
             ", atmostchoice : " +
@@ -487,7 +491,9 @@ export default function Home() {
           "ipfshash : " +
             resp.ipfshash +
             " , votedeadline " +
-            resp.votedeadline._hex +
+            moment(resp.votedeadline._hex * 1000).format(
+              "YYYY-MM-DD hh:mm:ss"
+            ) +
             ", paymentamounts : " +
             resp.paymentamounts +
             " , payschedule: " +
@@ -627,18 +633,25 @@ export default function Home() {
             "http://bounance.online:8000/entry?user=" +
               account +
               "&tx=" +
-              resp1.hash
+              resp1.hash,
+            {
+              method: "POST",
+              headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+              },
+            }
           );
         });
       })
       .catch((e) => {
+        console.log(e);
         var regex = /(?:"data":{"message":).*/g;
         var str = e.message;
         var result = regex.exec(str);
         if (result === null) {
           result = ["Error"];
         }
-        console.log(result[0]);
 
         set_submitProjectProposal(result[0]);
       });
@@ -779,9 +792,8 @@ export default function Home() {
     setIpfshash(e.target.value);
   };
   const handle_pm_surveydeadline = (e) => {
-    //setSurveydeadline(e.target.value);
-    console.log(new Date(e.target.value).valueOf());
-    setSurveydeadline(new Date(e.target.value).valueOf());
+    const k = moment(e.target.value, "YYYY-MM-DD hh:mm:ss").unix();
+    setSurveydeadline(k);
   };
   const handle_pm_numchoices = (e) => {
     setNumchoices(e.target.value);
@@ -809,8 +821,9 @@ export default function Home() {
   };
   const handle_pm_votedeadline = (e) => {
     //setVotedeadline(e.target.value);
-    console.log(new Date(e.target.value).valueOf());
-    setVotedeadline(new Date(e.target.value).valueOf());
+    //setVotedeadline(new Date(e.target.value).valueOf());
+    const k = moment(e.target.value, "YYYY-MM-DD hh:mm:ss").unix();
+    setVotedeadline(k);
   };
   const handle_pm_paymentamounts = (e) => {
     setPaymentamounts(e.target.value);
@@ -967,8 +980,8 @@ export default function Home() {
             <input
               className="form-control"
               onChange={handle_pm_surveydeadline}
-              placeholder="surveydeadline: 2016-01-01T00:00:00.000Z"
-              defaultValue="2099-01-01T00:00:00.000Z"
+              placeholder="surveydeadline: YYYY-MM-DD hh:mm:ss"
+              defaultValue="YYYY-MM-DD hh:mm:ss"
             />
             <input
               className="form-control"
@@ -1375,7 +1388,8 @@ export default function Home() {
             <input
               className="form-control"
               onChange={handle_pm_votedeadline}
-              placeholder="votedeadline: 2016-01-01T00:00:00.000Z"
+              placeholder="votedeadline: YYYY-MM-DD hh:mm:ss"
+              defaultValue="YYYY-MM-DD hh:mm:ss"
             />
             <input
               className="form-control"

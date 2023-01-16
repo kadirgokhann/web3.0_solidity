@@ -194,10 +194,10 @@ contract MyGov is ERC20 { //Inheriting the ERC20 functions for MyGov token
         int indx = int(findSchIndex(projectid))-1;// index of last payment to be withdrawn
 		require(indx != -1, "The voting for the installment still ongoing");
         require( (projectProposals.length > projectid) && (projectid >= 0) , "No such project exists with given id.");
-		require (msg.sender == projectProposals[projectid].owner); // CRUCIAL: checking if the person trying to withdraw is actually the owner of the project
-		require(findSchIndex(projectid) < projectProposals[projectid].paySchedule.length); //checking if the index in the boundaries of the payschedule array (more installlments than specified were attempted)
+		require (msg.sender == projectProposals[projectid].owner,"You are not the owner"); // CRUCIAL: checking if the person trying to withdraw is actually the owner of the project
+		require(findSchIndex(projectid) < projectProposals[projectid].paySchedule.length,"The index is not in the boundaries of the payschedule array"); //checking if the index in the boundaries of the payschedule array (more installlments than specified were attempted)
         uint idx = findSchIndex(projectid) -1;
-        require(projectProposals[projectid].paySchedule[idx]<= block.timestamp); //ASSUMPTION : Can receive the payment only after the corresponding date in the schedule 
+        require(projectProposals[projectid].paySchedule[idx]<= block.timestamp,"The timestamp is not after the corresponding date in the schedule"); //ASSUMPTION : Can receive the payment only after the corresponding date in the schedule 
         
 
 		uint tobelocked = 0 ;
