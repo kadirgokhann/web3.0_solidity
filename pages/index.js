@@ -381,7 +381,7 @@ export default function Home() {
     contract
       .withdrawProjectPayment(projectid, options)
       .then((resp) => {
-        set_withdrawProjectPayment("Success");
+        set_withdrawProjectPayment("Success ");
         console.log(resp);
       })
       .catch((e) => {
