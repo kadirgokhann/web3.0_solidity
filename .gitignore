@@ -1,5 +1,4 @@
 node_modules/*
-backend/*.txt
 ./.next
 ./.next/*
 artifacts/*

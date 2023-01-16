@@ -178,13 +178,12 @@ contract MyGov is ERC20 { //Inheriting the ERC20 functions for MyGov token
 		require (msg.sender == projectProposals[projectid].owner);
 		require(findSchIndex(projectid) == 0, "The deadline has passed."); //??????????? or the one below?
 		require (projectProposals[projectid].deadline >= block.timestamp, "Deadline exceeded."); // checking if the deadline is here yet.
-
+        
 		uint totalfunding = 0;
 		
 		for(uint i=0;i < projectProposals[projectid].paymentAmounts.length;i++){
 			totalfunding += projectProposals[projectid].paymentAmounts[i];
 		}
-		
 		require(address(this).balance >= totalfunding, "Not enough ethers to fund the project.");
 		lockedWei += totalfunding;
         //projectProposals[projectid].allowedToWithdraw[0] = true;//first payment is approved by default, but a vote will be necessary for next payments
@@ -198,7 +197,7 @@ contract MyGov is ERC20 { //Inheriting the ERC20 functions for MyGov token
 		require(findSchIndex(projectid) < projectProposals[projectid].paySchedule.length,"The index is not in the boundaries of the payschedule array"); //checking if the index in the boundaries of the payschedule array (more installlments than specified were attempted)
         uint idx = findSchIndex(projectid) -1;
         require(projectProposals[projectid].paySchedule[idx]<= block.timestamp,"The timestamp is not after the corresponding date in the schedule"); //ASSUMPTION : Can receive the payment only after the corresponding date in the schedule 
-        
+     
 
 		uint tobelocked = 0 ;
 		ProjectProposal memory  p= projectProposals[projectid]; 

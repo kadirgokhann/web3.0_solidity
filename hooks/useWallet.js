@@ -29,8 +29,13 @@ export default function WalletProvider({ children, contractAddress }) {
           method: "eth_getBalance",
           params: [accounts[0], "latest"],
         });
+        let contractBalance = await window.ethereum.request({
+          method: "eth_getBalance",
+          params: ["0x5FbDB2315678afecb367f032d93F642f64180aa3", "latest"],
+        });
         const weiValue = Web3.utils.fromWei(getBalance.toString(), "ether");
         console.log(getBalance.toString());
+        console.log("Contract Balance: " + contractBalance.toString());
         setBalance(weiValue);
       } catch (error) {
         alert(error.message);

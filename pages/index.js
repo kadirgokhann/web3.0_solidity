@@ -188,8 +188,15 @@ export default function Home() {
     contract
       .submitSurvey(ipfshash, surveydeadline, numchoices, atmostchoice, options)
       .then((resp1) => {
+        console.log(resp1);
         contract.getNoOfSurveys().then((resp) => {
-          set_getNoOfSurveys(resp._hex);
+          const number = resp._hex;
+          if (number === null) {
+            set_getNoOfSurveys(0x00);
+          } else {
+            set_getNoOfSurveys(resp._hex);
+          }
+
           const submit = fetch(
             "http://bounance.online:8000/entry?user=" +
               userId +
@@ -351,7 +358,7 @@ export default function Home() {
     contract
       .reserveProjectGrant(projectid, options)
       .then((resp) => {
-        set_reserveProjectGrant(resp);
+        set_reserveProjectGrant("Success");
         console.log(resp);
       })
       .catch((e) => {
@@ -374,7 +381,7 @@ export default function Home() {
     contract
       .withdrawProjectPayment(projectid, options)
       .then((resp) => {
-        set_withdrawProjectPayment(resp);
+        set_withdrawProjectPayment("Success");
         console.log(resp);
       })
       .catch((e) => {
@@ -397,7 +404,7 @@ export default function Home() {
     contract
       .votingforinstallment(projectid, choice, options)
       .then((resp) => {
-        set_votingforinstallment(resp);
+        set_votingforinstallment("Success");
         console.log(resp);
       })
       .catch((e) => {
@@ -552,8 +559,10 @@ export default function Home() {
       });
   };
   const handle_donateEther = () => {
+    var Web3 = require("web3");
     const options = {
-      value: ethers.utils.parseUnits(amount, 18),
+      value: Web3.utils.toWei(amount, "wei"),
+      //value: ethers.utils.parseUnits(amount, 18) * 1000000000000000000,
       from: account,
       gasLimit: 3000000,
     };
@@ -628,21 +637,29 @@ export default function Home() {
       gasLimit: 3000000,
     };
     const ar_payment = paymentamounts.split(",");
-    const ar_schedule = payschedule.split(",");
+    console.log(ar_payment);
     contract
       .submitProjectProposal(
         ipfshash,
         votedeadline,
         ar_payment,
-        ar_schedule,
+        payschedule,
         options
       )
       .then((resp1) => {
-        contract.getNoOfSurveys().then((resp) => {
-          set_getNoOfProjectProposals(resp._hex);
-          set_submitProjectProposal(
-            "id :" + getNoOfProjectProposals + " , Hash:" + resp1.hash
-          );
+        contract.getNoOfProjectProposals().then((resp) => {
+          const number = resp._hex;
+          console.log(number);
+          if (number === null || number === undefined) {
+            set_submitProjectProposal("id :0x00 , Hash:" + resp1.hash);
+            set_getNoOfProjectProposals(0x00);
+          } else {
+            set_getNoOfProjectProposals(number);
+            set_submitProjectProposal(
+              "id :" + number + " , Hash:" + resp1.hash
+            );
+          }
+
           console.log(resp);
           const submit = fetch(
             "http://bounance.online:8000/entry?user=" +
@@ -844,7 +861,11 @@ export default function Home() {
     setPaymentamounts(e.target.value);
   };
   const handle_pm_payschedule = (e) => {
-    setPayschedule(e.target.value);
+    let ar_schedule = e.target.value.split(",");
+    for (var i = 0; i < ar_schedule.length; i++) {
+      ar_schedule[i] = moment(ar_schedule[i], "YYYY-MM-DD hh:mm:ss").unix();
+    }
+    setPayschedule(ar_schedule);
   };
   const handle_pm_from = (e) => {
     setFrom(e.target.value);
@@ -990,7 +1011,8 @@ export default function Home() {
             <input
               className="form-control"
               onChange={handle_pm_ipfshash}
-              placeholder="ipfshash"
+              placeholder="ipfshash : https://...."
+              defaultValue="https://"
             />
             <input
               className="form-control"
@@ -1398,7 +1420,8 @@ export default function Home() {
             <input
               className="form-control"
               onChange={handle_pm_ipfshash}
-              placeholder="ipfshash"
+              placeholder="ipfshash: https://..."
+              defaultValue="https://"
             />
             <input
               className="form-control"
