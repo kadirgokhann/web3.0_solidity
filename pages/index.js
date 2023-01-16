@@ -3,12 +3,14 @@ import { useState, useEffect } from "react";
 import { useWallet } from "../hooks/useWallet";
 import { ethers } from "ethers";
 import moment from "moment";
+import { Router } from "next/router";
+import { useRouter } from "next/router";
 
 export default function Home() {
   const { account, balance, contract, connectWallet } = useWallet();
   const [users, setUsers] = useState([]);
   const [userId, setUserId] = useState("");
-
+  const router = useRouter();
   // PARAMETERS FUNCTIONS
   const [ipfshash, setIpfshash] = useState("");
   const [surveydeadline, setSurveydeadline] = useState("");
@@ -116,14 +118,27 @@ export default function Home() {
         setUsers(result[0]);
       });
   };
-  const txHistory = async (e) => {
+  const _txHistory = async (e) => {
     e.preventDefault();
-    // get request
+    // route https://blockexplorer.bloxberg.org/address/0x1275D096B9DBf2347bD2a131Fb6BDaB0B4882487/transactions
+
     const url = "http://bounance.online:8000/entries";
+
     const response = await fetch(url);
     const data = await response.json();
     console.log(data);
   };
+  function txHistory() {
+    const url = "http://bounance.online:8000/entries";
+
+    const response = fetch(url).then((response) =>
+      console.log(response.json())
+    );
+
+    router.push(
+      "https://blockexplorer.bloxberg.org/address/0x1275D096B9DBf2347bD2a131Fb6BDaB0B4882487/transactions"
+    );
+  }
 
   const handle_balanceOf = async () => {
     contract
