@@ -161,9 +161,9 @@ contract MyGov is ERC20 { //Inheriting the ERC20 functions for MyGov token
 		require ( (currentMyGovSupply) > 0,"No more tokens left in the contract.");
 		require(users[spender].UsedFaucet == false, "You already used the faucet.");
     
-        this.transfer(spender, 5); //  transfering 1 mygov token from the contract to the user calling the function (aka msg.sender) //TODO CHANGE IT BACK TO 1,AFTER TESTING SUBMISION
+        this.transfer(spender, 1); //  transfering 1 mygov token from the contract to the user calling the function (aka msg.sender) //TODO CHANGE IT BACK TO 1,AFTER TESTING SUBMISION
         users[spender].UsedFaucet = true; //this is crucial, otherwise a malicious user could drain the contract
-        users[spender].myGovTokens += 5;  //todo dont need it anymore
+        users[spender].myGovTokens += 1;  //todo dont need it anymore
 
         countMembers++;
         
